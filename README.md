@@ -1,4 +1,4 @@
-# Sync GitHub
+# GitHub Sync
 
 ![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
@@ -42,19 +42,19 @@ Ensure you are in the root directory and run:
 
 **The installer will automatically:**
 1. Make the core script executable.
-2. Link the CLI utility to your path (`~/.local/bin/sync-github`), allowing you to invoke it from anywhere.
-3. Generate a Spotlight-searchable macOS wrapper (`Sync GitHub.app`) or a launcher `.desktop` shortcut on Linux.
+2. Link the CLI utility to your path (`~/.local/bin/github-sync`), allowing you to invoke it from anywhere.
+3. Generate a Spotlight-searchable macOS wrapper (`GitHub Sync.app`) or a launcher `.desktop` shortcut on Linux.
 
 ## Usage
-By default, running `sync-github` expects repositories in `~/GitHub` or `~/Scripts`.
+By default, running `github-sync` expects repositories in `~/GitHub` or `~/Scripts`.
 
 ```bash
-sync-github
+github-sync
 ```
 
 **Custom Paths:**
 You can override the default paths on the fly by passing the parent directories as arguments:
 
 ```bash
-sync-github ~/Projects ~/Work
+github-sync ~/Projects ~/Work
 ```
