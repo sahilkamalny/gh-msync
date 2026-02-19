@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sync GitHub Repositories
+Comment=Sync all GitHub repositories
+Exec=$HOME/sync-github-repositories/linux/run-linux.sh
+Icon=utilities-terminal
+Terminal=true
+Type=Application
+Categories=Development;
