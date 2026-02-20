@@ -116,5 +116,14 @@ echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━�
 echo -e "\033[1;32m  ✅ Uninstallation Complete.\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
+
+if [[ "$OS" == "Darwin" ]]; then
+    osascript -e 'display notification "Uninstallation complete. All configurations and files have been removed." with title "GitHub Sync"'
+elif [[ "$OS" == "Linux" ]]; then
+    if command -v notify-send >/dev/null; then
+        notify-send "GitHub Sync" "Uninstallation complete. All configurations and files have been removed."
+    fi
+fi
+
 echo -e "\n\033[3mBuilt with care by Sahil Kamal for the GitHub community.\033[0m"
 echo ""

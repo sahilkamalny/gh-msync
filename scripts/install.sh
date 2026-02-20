@@ -346,5 +346,14 @@ elif [[ "$OS" == "Linux" ]]; then
     echo -e "    or by launching it from your Linux application menu."
 fi
 echo ""
+
+if [[ "$OS" == "Darwin" ]]; then
+    osascript -e 'display notification "Installation complete. You can now use the github-sync command." with title "GitHub Sync"'
+elif [[ "$OS" == "Linux" ]]; then
+    if command -v notify-send >/dev/null; then
+        notify-send "GitHub Sync" "Installation complete. You can now use the github-sync command."
+    fi
+fi
+
 echo -e "\n\033[3mBuilt with care by Sahil Kamal for the GitHub community.\033[0m"
 echo ""
