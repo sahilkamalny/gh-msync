@@ -39,8 +39,9 @@ Ensure you are in the root directory and run:
 
 **The installer will automatically:**
 1. Make the core scripts executable.
-2. Link the CLI utility to your path (`~/.local/bin/github-sync`), allowing you to invoke it from anywhere.
-3. Generate a Spotlight-searchable macOS wrapper (`GitHub Sync.app`) or a launcher `.desktop` shortcut on Linux.
+2. Link the CLI utility to your designated local binaries folder (`~/.local/bin/github-sync`).
+3. Safely configure your active shell environment (`~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`) to natively export this folder to your `$PATH`, allowing you to seamlessly invoke the `github-sync` command globally.
+4. Generate a Spotlight-searchable macOS wrapper (`GitHub Sync.app`) or a launcher `.desktop` shortcut on Linux.
 
 ## Usage
 
