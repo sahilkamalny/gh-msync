@@ -136,11 +136,14 @@ done
 printf "\r\033[K"
 
 # Process and print results sequentially for a clean UI
+PAD=""
+[ "$APP_GUI" == "1" ] && PAD="   "
+
 display_count=1
 for i in "${!repo_paths[@]}"; do
     repo="${repo_paths[$i]}"
     REPO_NAME=$(basename "$repo")
-    printf "[%d/%d] %s " "$display_count" "$total" "$REPO_NAME"
+    printf "${PAD}[%d/%d] %s " "$display_count" "$total" "$REPO_NAME"
     ((display_count++))
     
     if [ "${statuses[$i]}" -eq 2 ]; then

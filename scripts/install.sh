@@ -261,6 +261,7 @@ if [[ "$OS" == "Darwin" ]]; then
 #!/bin/bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+export APP_GUI=1
 "$REPO_DIR/scripts/github-sync.sh"
 
 echo ""
