@@ -4,7 +4,7 @@
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 
-A highly polished, reliable, and OS-aware shell utility to effortlessly synchronize multiple local GitHub repositories at once.
+Reliable, OS-aware shell utility to effortlessly synchronize multiple local GitHub repositories at once.
 
 ## Features
 - **Parallel Fetching:** Iterates and pulls repositories concurrently, falling back gracefully if errors occur.
