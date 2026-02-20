@@ -29,7 +29,7 @@ This utility allows you to seamlessly detect and clone repositories you own on G
 3. Follow the interactive prompts to log in via your web browser. Once finished, this utility will automatically discover your account on its next run and offer a GUI or Terminal prompt to clone any missing repositories!
 
 ### SSH Configuration Required
-Because this utility dynamically upgrades standard `https://` remotes to `git@github.com:` SSH remotes (bypassing strict authentication limits and hardcoded usernames), **you must have a GitHub SSH Key configured on your machine.**
+Because this utility dynamically upgrades all remotes to secure SSH connections (as noted in Features), **you must have a GitHub SSH Key configured on your machine.**
 
 If you do not have an SSH key set up for GitHub, follow GitHub's official universal guide for your specific OS:
 1. [Generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
