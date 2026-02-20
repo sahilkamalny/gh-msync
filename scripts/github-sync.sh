@@ -188,7 +188,7 @@ if command -v gh >/dev/null 2>&1; then
             echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
             echo -e "${CYAN}  🔍 Missing Repositories${RESET}"
             echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
-            printf "\n    Would you like to check for and clone missing remote repositories? [y/N]: "
+            printf "\n    Would you like to check for and clone missing remote repositories? [y/n]: "
             read -r clone_choice
             echo ""
         fi
@@ -348,13 +348,13 @@ if command -v gh >/dev/null 2>&1; then
             
             # Fallback to terminal prompt if no GUI tool was available
             if [ "$HAS_GUI" -eq 0 ]; then
-                echo -e "${YELLOW}You have ${#missing_repos[@]} repository(ies) on GitHub that are not cloned locally:${RESET}"
+                echo -e "    ${YELLOW}You have ${#missing_repos[@]} repository(ies) on GitHub that are not cloned locally:${RESET}"
                 for i in "${!missing_repos[@]}"; do
-                    echo "  $((i+1))) ${missing_repos[$i]}"
+                    echo "      $((i+1))) ${missing_repos[$i]}"
                 done
                 echo ""
                 if [ -t 0 ]; then
-                    read -p "Enter comma-separated numbers to clone (or press Enter to skip): " -r choices
+                    read -p "    Enter comma-separated numbers to clone (or press Enter to skip): " -r choices
                     if [ -n "$choices" ]; then
                         IFS=',' read -ra CH_ARR <<< "$choices"
                         for c in "${CH_ARR[@]}"; do
@@ -369,11 +369,11 @@ if command -v gh >/dev/null 2>&1; then
                         if [ -n "$SELECTED_REPOS" ]; then
                             CLONE_DIR="${BASE_DIRS[0]}"
                             if [ ${#BASE_DIRS[@]} -gt 1 ]; then
-                                echo -e "${CYAN}Available directories for cloning:${RESET}"
+                                echo -e "    ${CYAN}Available directories for cloning:${RESET}"
                                 for i in "${!BASE_DIRS[@]}"; do
-                                    echo "  $((i+1))) ${BASE_DIRS[$i]}"
+                                    echo "      $((i+1))) ${BASE_DIRS[$i]}"
                                 done
-                                read -p "Select a directory (1-${#BASE_DIRS[@]}) [Default: 1]: " -r dir_choice
+                                read -p "    Select a directory (1-${#BASE_DIRS[@]}) [Default: 1]: " -r dir_choice
                                 echo ""
                                 if [[ "$dir_choice" =~ ^[0-9]+$ ]] && [ "$dir_choice" -ge 1 ] && [ "$dir_choice" -le "${#BASE_DIRS[@]}" ]; then
                                     CLONE_DIR="${BASE_DIRS[$((dir_choice-1))]}"
@@ -387,7 +387,7 @@ if command -v gh >/dev/null 2>&1; then
             if [ -n "$SELECTED_REPOS" ] && [ -n "$CLONE_DIR" ]; then
                 echo ""
                 mkdir -p "$CLONE_DIR"
-                echo -e "${BLUE}⬇ Cloning selected repositories into $CLONE_DIR...${RESET}"
+                echo -e "    ${BLUE}⬇ Cloning selected repositories into $CLONE_DIR...${RESET}"
                 
                 IFS='|' read -ra SEL_ARR <<< "$SELECTED_REPOS"
                 for sel_repo in "${SEL_ARR[@]}"; do
@@ -400,17 +400,17 @@ if command -v gh >/dev/null 2>&1; then
                     done
                     
                     if [ -n "$target_url" ]; then
-                        echo -e "${CYAN}Cloning $target_url...${RESET}"
-                        (cd "$CLONE_DIR" && git clone "$target_url")
+                        echo -e "    ${CYAN}Cloning $target_url...${RESET}"
+                        (cd "$CLONE_DIR" && git clone --progress "$target_url" 2>&1 | sed $'s/\r/\r    /g' | sed 's/^/    /')
                     fi
                 done
                 
-                echo -e "${GREEN}✅ Cloning complete.${RESET}\n"
+                echo -e "\n    ${GREEN}✅ Cloning complete.${RESET}\n"
             else
-                echo -e "${YELLOW}ℹ️  No repositories cloned.${RESET}\n"
+                echo -e "\n    ${YELLOW}ℹ️  No repositories cloned.${RESET}\n"
             fi
         else
-            echo -e "${GREEN}✅ All your remote repositories are already cloned locally.${RESET}\n"
+            echo -e "\n    ${GREEN}✅ All your remote repositories are already cloned locally.${RESET}\n"
         fi
         fi
     fi
