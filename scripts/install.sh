@@ -32,30 +32,78 @@ echo ""
 USER_PATHS=""
 
 if [[ "$OS" == "Darwin" ]]; then
-    # macOS native AppleScript folder picker
-    USER_PATHS=$(osascript -e '
-        try
-            set chosen_folders to choose folder with prompt "Select your GitHub repository folders (You can select multiple by holding Command):" default location (path to home folder) multiple selections allowed true
-            set path_list to ""
-            repeat with f in chosen_folders
-                set path_list to path_list & POSIX path of f & ","
-            end repeat
-            if (length of path_list) > 0 then
-                return text 1 thru -2 of path_list
-            else
+    # macOS native AppleScript folder picker loop
+    while true; do
+        selected=$(osascript -e '
+            try
+                set chosen to choose folder with prompt "Select a repository folder (or click Cancel to use defaults):" default location (path to home folder)
+                return POSIX path of chosen
+            on error
                 return ""
-            end if
-        on error
-            return ""
-        end try
-    ' 2>/dev/null || echo "")
+            end try
+        ' 2>/dev/null)
+        
+        if [ -n "$selected" ]; then
+            if [ -z "$USER_PATHS" ]; then
+                USER_PATHS="$selected"
+            else
+                USER_PATHS="$USER_PATHS,$selected"
+            fi
+            
+            add_more=$(osascript -e '
+                try
+                    set response to display dialog "Added:\n'"$selected"'\n\nWould you like to add another repository folder?" buttons {"No", "Yes"} default button "Yes" with title "GitHub Sync Configuration"
+                    return button returned of response
+                on error
+                    return "No"
+                end try
+            ' 2>/dev/null)
+            
+            if [ "$add_more" != "Yes" ]; then
+                break
+            fi
+        else
+            break
+        fi
+    done
 elif [[ "$OS" == "Linux" ]]; then
-    # Linux GUI native folder picker
+    # Linux GUI native folder picker loop
     if command -v zenity >/dev/null; then
-        USER_PATHS=$(zenity --file-selection --directory --multiple --separator="," --title="Select your GitHub repository folders" 2>/dev/null || echo "")
+        while true; do
+            selected=$(zenity --file-selection --directory --title="Select a repo folder (Cancel for defaults)" 2>/dev/null)
+            if [ -n "$selected" ]; then
+                if [ -z "$USER_PATHS" ]; then
+                    USER_PATHS="$selected"
+                else
+                    USER_PATHS="$USER_PATHS,$selected"
+                fi
+                
+                zenity --question --title="GitHub Sync Configuration" --text="Added:\n$selected\n\nWould you like to add another repository folder?" 2>/dev/null
+                if [ $? -ne 0 ]; then
+                    break
+                fi
+            else
+                break
+            fi
+        done
     elif command -v kdialog >/dev/null; then
-        # kdialog does not easily support multiple directory selection in one go natively in all versions, but we provide standard text fallback if it fails.
-        USER_PATHS=$(kdialog --getexistingdirectory "$HOME" --title "Select a GitHub repository folder" 2>/dev/null || echo "")
+        while true; do
+            selected=$(kdialog --getexistingdirectory "$HOME" --title "Select repo folder (Cancel for defaults)" 2>/dev/null)
+            if [ -n "$selected" ]; then
+                if [ -z "$USER_PATHS" ]; then
+                    USER_PATHS="$selected"
+                else
+                    USER_PATHS="$USER_PATHS,$selected"
+                fi
+                
+                kdialog --title "GitHub Sync Configuration" --yesno "Added:\n$selected\n\nWould you like to add another repository folder?" 2>/dev/null
+                if [ $? -ne 0 ]; then
+                    break
+                fi
+            else
+                break
+            fi
+        done
     else
         read -p "Enter custom repository paths (comma separated) or press Enter for defaults: " USER_PATHS
     fi
