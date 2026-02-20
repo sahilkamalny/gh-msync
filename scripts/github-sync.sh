@@ -137,7 +137,7 @@ printf "\r\033[K"
 
 # Process and print results sequentially for a clean UI
 PAD=""
-[ "$APP_GUI" == "1" ] && PAD="   "
+[ "$APP_GUI" == "1" ] && PAD="    "
 
 display_count=1
 for i in "${!repo_paths[@]}"; do

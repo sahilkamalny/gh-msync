@@ -22,7 +22,7 @@ echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━�
 echo -e "\033[1;36m  🚀 GitHub Sync Installer\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
-echo -e "   \033[3mPlease interact with the configuration pop-up...\033[0m"
+echo -e "    \033[3mPlease interact with the configuration pop-up...\033[0m"
 echo ""
 
 USER_PATHS=""
@@ -210,17 +210,17 @@ if [ -n "$USER_PATHS" ]; then
         # Trim whitespace
         p=$(echo "$p" | xargs)
         if [ -n "$p" ]; then
-            echo -e "   \033[1;32m✓\033[0m $p"
+            echo -e "    \033[1;32m✓\033[0m $p"
             echo "$p" >> "$CONFIG_FILE"
         fi
     done
 else
-    echo -e "   \033[1;32m✓\033[0m ~/GitHub"
-    echo -e "   \033[1;32m✓\033[0m ~/Projects"
-    echo -e "   \033[1;32m✓\033[0m ~/Scripts"
-    echo -e "   \033[1;32m✓\033[0m ~/Repositories"
+    echo -e "    \033[1;32m✓\033[0m ~/GitHub"
+    echo -e "    \033[1;32m✓\033[0m ~/Projects"
+    echo -e "    \033[1;32m✓\033[0m ~/Scripts"
+    echo -e "    \033[1;32m✓\033[0m ~/Repositories"
     echo ""
-    echo -e "   \033[1;30m(Using Default Fallbacks)\033[0m"
+    echo -e "    \033[1;30m(Using Default Fallbacks)\033[0m"
 fi
 
 echo ""
@@ -233,21 +233,21 @@ echo ""
 chmod +x "$SCRIPT_PATH"
 chmod +x "$REPO_DIR/scripts/install.sh"
 chmod +x "$REPO_DIR/scripts/uninstall.sh"
-echo -e "   \033[1;32m✓\033[0m Core scripts marked as executable"
+echo -e "    \033[1;32m✓\033[0m Core scripts marked as executable"
 
 if [ -n "$USER_PATHS" ]; then
-    echo -e "   \033[1;32m✓\033[0m Saved configuration to \033[4m~/.config/github-sync/config\033[0m"
+    echo -e "    \033[1;32m✓\033[0m Saved configuration to \033[4m~/.config/github-sync/config\033[0m"
 fi
 
 # 2. Setup CLI symlink
 LOCAL_BIN="$HOME/.local/bin"
 if [ ! -d "$LOCAL_BIN" ]; then
     mkdir -p "$LOCAL_BIN"
-    echo -e "   \033[1;32m✓\033[0m Created local bin directory (\033[4m~/.local/bin\033[0m)"
+    echo -e "    \033[1;32m✓\033[0m Created local bin directory (\033[4m~/.local/bin\033[0m)"
 fi
 
 ln -sf "$SCRIPT_PATH" "$LOCAL_BIN/github-sync"
-echo -e "   \033[1;32m✓\033[0m Linked global CLI command (\033[1mgithub-sync\033[0m)"
+echo -e "    \033[1;32m✓\033[0m Linked global CLI command (\033[1mgithub-sync\033[0m)"
 
 # 3. Handle OS-specific App Wrappers
 if [[ "$OS" == "Darwin" ]]; then
@@ -280,7 +280,7 @@ EOF
         cp "/System/Applications/Utilities/Terminal.app/Contents/Resources/Terminal.icns" "$APP_DIR/Contents/Resources/applet.icns"
         touch "$APP_DIR"
     fi
-    echo -e "   \033[1;32m✓\033[0m Generated macOS Application (\033[4mGitHub Sync.app\033[0m)"
+    echo -e "    \033[1;32m✓\033[0m Generated macOS Application (\033[4mGitHub Sync.app\033[0m)"
 
 elif [[ "$OS" == "Linux" ]]; then
     DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
@@ -301,17 +301,17 @@ Keywords=git;github;sync;repository;
 EOF
 
     chmod +x "$DESKTOP_FILE"
-    echo -e "   \033[1;32m✓\033[0m Generated Linux Application (\033[4mgithub-sync.desktop\033[0m)"
+    echo -e "    \033[1;32m✓\033[0m Generated Linux Application (\033[4mgithub-sync.desktop\033[0m)"
 fi
 
 echo ""
 
 if [[ ":$PATH:" != *":$LOCAL_BIN:"* ]]; then
-    echo -e "   \033[1;33m⚠️  Warning: $LOCAL_BIN is not in your PATH.\033[0m"
+    echo -e "    \033[1;33m⚠️  Warning: $LOCAL_BIN is not in your PATH.\033[0m"
     if [[ "$OS" == "Darwin" ]]; then
-        echo -e "      Add to ~/.zshrc or ~/.bash_profile: \033[1;37mexport PATH=\"\$HOME/.local/bin:\$PATH\"\033[0m"
+        echo -e "         Add to ~/.zshrc or ~/.bash_profile: \033[1;37mexport PATH=\"\$HOME/.local/bin:\$PATH\"\033[0m"
     else
-        echo -e "      Add to ~/.bashrc or ~/.profile: \033[1;37mexport PATH=\"\$HOME/.local/bin:\$PATH\"\033[0m"
+        echo -e "         Add to ~/.bashrc or ~/.profile: \033[1;37mexport PATH=\"\$HOME/.local/bin:\$PATH\"\033[0m"
     fi
     echo ""
 fi
@@ -320,11 +320,11 @@ echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━�
 echo -e "\033[1;32m  ✅ Installation Complete!\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
-echo -e "   You can now launch it by typing \033[1;36mgithub-sync\033[0m in your terminal,"
+echo -e "    You can now launch it by typing \033[1;36mgithub-sync\033[0m in your terminal,"
 if [[ "$OS" == "Darwin" ]]; then
-    echo -e "   or by double-clicking \033[1mGitHub Sync.app\033[0m in this folder."
+    echo -e "    or by double-clicking \033[1mGitHub Sync.app\033[0m in this folder."
 elif [[ "$OS" == "Linux" ]]; then
-    echo -e "   or by launching it from your Linux application menu."
+    echo -e "    or by launching it from your Linux application menu."
 fi
 echo ""
 echo -e "\n\033[3mBuilt with care by Sahil Kamal for the GitHub community.\033[0m"
