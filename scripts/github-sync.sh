@@ -28,8 +28,18 @@ if [ -f "$CONFIG_FILE" ]; then
     done < "$CONFIG_FILE"
 fi
 
-if [ $# -gt 0 ]; then
-    BASE_DIRS=("$@")
+FORCE_CLI=0
+ARGS_DIRS=()
+for arg in "$@"; do
+    if [[ "$arg" == "--cli" || "$arg" == "--headless" ]]; then
+        FORCE_CLI=1
+    else
+        ARGS_DIRS+=("$arg")
+    fi
+done
+
+if [ ${#ARGS_DIRS[@]} -gt 0 ]; then
+    BASE_DIRS=("${ARGS_DIRS[@]}")
 elif [ "${#CONFIG_DIRS[@]}" -gt 0 ]; then
     BASE_DIRS=("${CONFIG_DIRS[@]}")
 else
@@ -265,10 +275,12 @@ if command -v gh >/dev/null 2>&1; then
             CLONE_DIR=""
 
             HAS_GUI=0
-            if [[ "$OS" == "Darwin" ]] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
-                HAS_GUI=1
-            elif [[ "$OS" == "Linux" ]] && { [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; }; then
-                HAS_GUI=1
+            if [ "$FORCE_CLI" -eq 0 ]; then
+                if [[ "$OS" == "Darwin" ]] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
+                    HAS_GUI=1
+                elif [[ "$OS" == "Linux" ]] && { [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; }; then
+                    HAS_GUI=1
+                fi
             fi
 
             if [ "$HAS_GUI" -eq 1 ]; then
@@ -373,7 +385,7 @@ if command -v gh >/dev/null 2>&1; then
                 done
                 echo ""
                 if [ -t 0 ]; then
-                    read -p "    Enter comma-separated numbers to clone (or press Enter to skip): " -r choices
+                    read -p "$(echo -e "    ${CYAN}Enter comma-separated numbers to clone (or press Enter to skip): ${RESET}")" -r choices
                     if [ -n "$choices" ]; then
                         IFS=',' read -ra CH_ARR <<< "$choices"
                         for c in "${CH_ARR[@]}"; do
@@ -392,7 +404,7 @@ if command -v gh >/dev/null 2>&1; then
                                 for i in "${!BASE_DIRS[@]}"; do
                                     echo "      $((i+1))) ${BASE_DIRS[$i]}"
                                 done
-                                read -p "    Select a directory (1-${#BASE_DIRS[@]}) [Default: 1]: " -r dir_choice
+                                read -p "$(echo -e "    ${CYAN}Select a directory (1-${#BASE_DIRS[@]}) [Default: 1]: ${RESET}")" -r dir_choice
                                 echo ""
                                 if [[ "$dir_choice" =~ ^[0-9]+$ ]] && [ "$dir_choice" -ge 1 ] && [ "$dir_choice" -le "${#BASE_DIRS[@]}" ]; then
                                     CLONE_DIR="${BASE_DIRS[$((dir_choice-1))]}"

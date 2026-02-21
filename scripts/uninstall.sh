@@ -15,10 +15,31 @@ if [ ! -f "$HOME/.local/bin/github-sync" ] && [ ! -d "$HOME/.config/github-sync"
     exit 0
 fi
 
+# Define Colors
+CYAN="\033[1;36m"
+RESET="\033[0m"
+
 echo -e "    \033[3mPlease interact with the configuration pop-up...\033[0m"
 
+FORCE_CLI=0
+for arg in "$@"; do
+    if [[ "$arg" == "--cli" || "$arg" == "--headless" ]]; then
+        FORCE_CLI=1
+    fi
+done
+
+HAS_GUI=0
+if [ "$FORCE_CLI" -eq 0 ]; then
+    if [[ "$OS" == "Darwin" ]] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
+        HAS_GUI=1
+    elif [[ "$OS" == "Linux" ]] && { [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; }; then
+        HAS_GUI=1
+    fi
+fi
+
 # Native Uninstallation Confirmation
-if [[ "$OS" == "Darwin" ]]; then
+if [ "$HAS_GUI" -eq 1 ]; then
+    if [[ "$OS" == "Darwin" ]]; then
     response=$(osascript -e '
         try
             set theResult to display dialog "Are you sure you want to completely uninstall GitHub Sync?\n\nThis will remove the CLI command, background configurations, and the desktop application." buttons {"Cancel", "Uninstall"} default button "Cancel" with title "GitHub Sync Uninstaller" with icon caution
@@ -48,13 +69,18 @@ elif [[ "$OS" == "Linux" ]]; then
             echo ""
             exit 0
         fi
-    else
-        read -p "Are you sure you want to uninstall GitHub Sync? (y/n) " confirm
-        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-            echo -e "\n    \033[1;33mUninstallation cancelled.\033[0m"
-            echo ""
-            exit 0
+        else
+            HAS_GUI=0
         fi
+    fi
+fi
+
+if [ "$HAS_GUI" -eq 0 ]; then
+    read -p "$(echo -e "    ${CYAN}Are you sure you want to uninstall GitHub Sync? (y/n) ${RESET}")" confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo -e "\n    \033[1;33mUninstallation cancelled.\033[0m"
+        echo ""
+        exit 0
     fi
 fi
 

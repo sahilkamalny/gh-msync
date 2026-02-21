@@ -31,11 +31,24 @@ if [ -f "$CONFIG_FILE" ]; then
     USER_PATHS=$(paste -sd ',' "$CONFIG_FILE" 2>/dev/null || echo "")
 fi
 
+# Define Colors
+CYAN="\033[1;36m"
+RESET="\033[0m"
+
+FORCE_CLI=0
+for arg in "$@"; do
+    if [[ "$arg" == "--cli" || "$arg" == "--headless" ]]; then
+        FORCE_CLI=1
+    fi
+done
+
 HAS_GUI=0
-if [[ "$OS" == "Darwin" ]] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
-    HAS_GUI=1
-elif [[ "$OS" == "Linux" ]] && { [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; }; then
-    HAS_GUI=1
+if [ "$FORCE_CLI" -eq 0 ]; then
+    if [[ "$OS" == "Darwin" ]] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
+        HAS_GUI=1
+    elif [[ "$OS" == "Linux" ]] && { [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; }; then
+        HAS_GUI=1
+    fi
 fi
 
 if [ "$HAS_GUI" -eq 1 ]; then
@@ -219,12 +232,12 @@ fi
 
 if [ "$HAS_GUI" -eq 0 ]; then
     if [ -n "$USER_PATHS" ]; then
-        read -p "    Enter custom repository paths (comma separated) or press Enter to keep current: " input_paths
+        read -p "$(echo -e "    ${CYAN}Enter custom repository paths (comma separated) or press Enter to keep current: ${RESET}")" input_paths
         if [ -n "$input_paths" ]; then
             USER_PATHS="$input_paths"
         fi
     else
-        read -p "    Enter custom repository paths (comma separated) or press Enter for defaults: " USER_PATHS
+        read -p "$(echo -e "    ${CYAN}Enter custom repository paths (comma separated) or press Enter for defaults: ${RESET}")" USER_PATHS
     fi
 fi
 

@@ -4,7 +4,7 @@
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 
-🔄 Reliable, OS-aware shell utility to effortlessly synchronize multiple local GitHub repositories at once.
+🔄 Cross-platform Git repository synchronizer with Bash and Powershell backends. Built for macOS, Linux, and Windows.
 
 ## Features
 - **Parallel Fetching:** Iterates and pulls repositories concurrently, falling back gracefully if errors occur.
@@ -67,6 +67,14 @@ Once installed, you can trigger the synchronization process anytime by:
 
 By default, the script looks for repositories in `~/GitHub`.
 
+**Headless CLI Mode:**
+If you wish to run the synchronization, installation, or uninstallation scripts in a purely headless Terminal environment (bypassing all graphical Pop-up UIs), simply append the `--cli` or `--headless` flag to your command:
+
+```bash
+ghsync --cli
+```
+*This flag optimally bypasses AppleScript, Zenity, and kdialog checks across all operating systems, enforcing a standard generic Bash prompt fallback natively.*
+
 **Custom Paths & Configuration:**
 During the double-click installation sequence, a native desktop popup menu will appear. This menu allows you to browse and select multiple directories via your OS file-picker. You can configure folders from entirely different root drives, and remove tracked items via a native checkbox UI.
 
@@ -85,4 +93,4 @@ To completely remove the CLI link, desktop application, and wipe your repository
 3. **Terminal:** `./scripts/uninstall.sh`
 
 #
-~ ❯ *© 2026 Sahil Kamal.*
+*© 2026 Sahil Kamal.*
