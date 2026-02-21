@@ -10,7 +10,7 @@ CONFIG_DIR="$HOME/.config/github-sync"
 CONFIG_FILE="$CONFIG_DIR/config"
 
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "\033[1;36m  🐙 GitHub Sync\033[0m"
+echo -e "\033[1;36m  🔄 GitHub Sync\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
 
@@ -64,7 +64,7 @@ if [ "$total" -eq 0 ]; then
 fi
 
 # ---------- Header ----------
-echo -e "    ${BLUE}🚀  Syncing $total repositories concurrently...${RESET}"
+echo -e "    ${BLUE}↓  Syncing $total repositories concurrently...${RESET}"
 echo ""
 
 # Arrays to track state (Bash 3 compatible)
@@ -172,7 +172,7 @@ for i in "${!repo_paths[@]}"; do
     else
         commit_count=$(git rev-list --count "${before_commits[$i]}..$after_commit" 2>/dev/null || echo "1")
         file_count=$(git diff --name-only "${before_commits[$i]}..$after_commit" 2>/dev/null | wc -l | tr -d ' ')
-        echo -e "... ${CYAN}⬇ pulled $commit_count commit(s) affecting $file_count file(s) — now synced${RESET}"
+        echo -e "... ${CYAN}↓ pulled $commit_count commit(s) affecting $file_count file(s) — now synced${RESET}"
     fi
 
     # Clean up temp files
@@ -180,7 +180,7 @@ for i in "${!repo_paths[@]}"; do
 done
 
 echo ""
-echo -e "    ${BLUE}🔄  Repository sync complete.${RESET}\n"
+echo -e "    ${GREEN}↻  Repository sync complete.${RESET}\n"
 
 # ---------- Clone Missing Repositories ----------
 if command -v gh >/dev/null 2>&1; then
@@ -391,7 +391,7 @@ if command -v gh >/dev/null 2>&1; then
                 mkdir -p "$CLONE_DIR"
                 
                 IFS='|' read -ra SEL_ARR <<< "$SELECTED_REPOS"
-                echo -e "    ${BLUE}⬇  Cloning ${#SEL_ARR[@]} repositories into $CLONE_DIR...${RESET}\n"
+                echo -e "    ${BLUE}↓  Cloning ${#SEL_ARR[@]} repositories into $CLONE_DIR...${RESET}\n"
                 
                 display_count=1
                 for sel_repo in "${SEL_ARR[@]}"; do
@@ -415,7 +415,7 @@ if command -v gh >/dev/null 2>&1; then
                     ((display_count++))
                 done
                 
-                echo -e "\n    ${GREEN}✅ Cloning complete.${RESET}\n"
+                echo -e "\n    ${GREEN}✓  Cloning complete.${RESET}\n"
             else
                 echo -e "\n    ${YELLOW}No repositories cloned.${RESET}\n"
             fi
