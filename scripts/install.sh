@@ -219,8 +219,10 @@ echo ""
 
 if [ -f "$HOME/.local/bin/github-sync" ]; then
     echo -e "    \033[1;33mℹ️  GitHub Sync is already installed. Updating existing installation...\033[0m"
+    ACTION_STR="Updated"
 else
     echo -e "    \033[3mConfiguration saved. Preparing your synchronization environment...\033[0m"
+    ACTION_STR="Generated"
 fi
 echo ""
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -242,7 +244,7 @@ if [ -n "$USER_PATHS" ]; then
 else
     echo -e "    \033[1;32m✓\033[0m ~/GitHub"
     echo ""
-    echo -e "    \033[1;30m(Using Default Fallbacks)\033[0m"
+    echo -e "    \033[1;30m(Using Default Configuration)\033[0m"
 fi
 
 echo ""
@@ -300,7 +302,7 @@ EOF
         cp "/System/Applications/Utilities/Terminal.app/Contents/Resources/Terminal.icns" "$APP_DIR/Contents/Resources/applet.icns"
         touch "$APP_DIR"
     fi
-    echo -e "    \033[1;32m✓\033[0m Generated macOS Application (\033[4mGitHub Sync.app\033[0m)"
+    echo -e "    \033[1;32m✓\033[0m ${ACTION_STR} macOS Application (\033[4mGitHub Sync.app\033[0m)"
 
 elif [[ "$OS" == "Linux" ]]; then
     DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
@@ -321,7 +323,7 @@ Keywords=git;github;sync;repository;
 EOF
 
     chmod +x "$DESKTOP_FILE"
-    echo -e "    \033[1;32m✓\033[0m Generated Linux Application (\033[4mgithub-sync.desktop\033[0m)"
+    echo -e "    \033[1;32m✓\033[0m ${ACTION_STR} Linux Application (\033[4mgithub-sync.desktop\033[0m)"
 fi
 
 echo ""
@@ -369,5 +371,5 @@ elif [[ "$OS" == "Linux" ]]; then
     fi
 fi
 
-echo -e "\n\033[3mBuilt with care by Sahil Kamal for the GitHub community.\033[0m"
+echo -e "\n    \033[3mBuilt with care by Sahil Kamal for the GitHub community.\033[0m"
 echo ""
