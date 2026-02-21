@@ -64,7 +64,7 @@ if [ "$total" -eq 0 ]; then
 fi
 
 # ---------- Header ----------
-echo -e "    ${CYAN}↻  Syncing $total repositories concurrently...${RESET}"
+echo -e "    ${CYAN}Syncing $total repositories concurrently...${RESET}"
 echo ""
 
 # Arrays to track state (Bash 3 compatible)
@@ -129,7 +129,7 @@ while true; do
         break
     fi
     
-    printf "\r${CYAN}%s  Fetching updates from GitHub...${RESET}" "${spinner[$spin_idx]}"
+    printf "\r    ${CYAN}%s  Fetching updates from GitHub...${RESET}" "${spinner[$spin_idx]}"
     spin_idx=$(( (spin_idx + 1) % 10 ))
     sleep 0.1
 done

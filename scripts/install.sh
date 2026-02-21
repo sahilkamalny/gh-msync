@@ -269,6 +269,8 @@ else
     echo -e "    \033[1;32m✓\033[0m ~/GitHub"
     echo ""
     echo -e "    \033[1;30m(Using Default Configuration)\033[0m"
+    > "$CONFIG_FILE"
+    echo "$HOME/GitHub" >> "$CONFIG_FILE"
 fi
 
 echo ""
@@ -283,9 +285,7 @@ chmod +x "$REPO_DIR/scripts/install.sh"
 chmod +x "$REPO_DIR/scripts/uninstall.sh"
 echo -e "    \033[1;32m✓\033[0m Core scripts made executable"
 
-if [ -n "$USER_PATHS" ]; then
-    echo -e "    \033[1;32m✓\033[0m Saved configuration to \033[4m~/.config/github-sync/config\033[0m"
-fi
+echo -e "    \033[1;32m✓\033[0m Saved configuration to \033[4m~/.config/github-sync/config\033[0m"
 
 # 2. Setup CLI symlink
 LOCAL_BIN="$HOME/.local/bin"
