@@ -196,7 +196,7 @@ if command -v gh >/dev/null 2>&1; then
         fi
         
         if [[ ! "$clone_choice" =~ ^[Yy]$ ]]; then
-            echo -e "    ${YELLOW}ℹ️  Skipped cloning missing repositories.${RESET}\n"
+            echo -e "    ${YELLOW}Skipped cloning missing repositories.${RESET}\n"
         else
             echo -e "    ${CYAN}Fetching your repository list from GitHub...${RESET}"
         # Construct an array of local remote URLs (normalized/lowercase)
@@ -389,9 +389,11 @@ if command -v gh >/dev/null 2>&1; then
             if [ -n "$SELECTED_REPOS" ] && [ -n "$CLONE_DIR" ]; then
                 echo ""
                 mkdir -p "$CLONE_DIR"
-                echo -e "    ${BLUE}⬇ Cloning selected repositories into $CLONE_DIR...${RESET}"
                 
                 IFS='|' read -ra SEL_ARR <<< "$SELECTED_REPOS"
+                echo -e "    ${BLUE}⬇  Cloning ${#SEL_ARR[@]} repositories into $CLONE_DIR...${RESET}\n"
+                
+                display_count=1
                 for sel_repo in "${SEL_ARR[@]}"; do
                     target_url=""
                     for i in "${!missing_repos[@]}"; do
@@ -402,14 +404,20 @@ if command -v gh >/dev/null 2>&1; then
                     done
                     
                     if [ -n "$target_url" ]; then
-                        echo -e "    ${CYAN}Cloning $target_url...${RESET}"
-                        (cd "$CLONE_DIR" && git clone --progress "$target_url" 2>&1 | sed $'s/\r/\r    /g' | sed 's/^/    /')
+                        repo_name=$(basename "$target_url" .git)
+                        printf "    [%d/%d] %s " "$display_count" "${#SEL_ARR[@]}" "$repo_name"
+                        if (cd "$CLONE_DIR" && git clone -q "$target_url" >/dev/null 2>&1); then
+                            echo -e "... ${GREEN}✅ cloned${RESET}"
+                        else
+                            echo -e "... ${YELLOW}⚠️  failed to clone${RESET}"
+                        fi
                     fi
+                    ((display_count++))
                 done
                 
                 echo -e "\n    ${GREEN}✅ Cloning complete.${RESET}\n"
             else
-                echo -e "\n    ${YELLOW}ℹ️  No repositories cloned.${RESET}\n"
+                echo -e "\n    ${YELLOW}No repositories cloned.${RESET}\n"
             fi
         else
             echo -e "\n    ${GREEN}✅ All your remote repositories are already cloned locally.${RESET}\n"

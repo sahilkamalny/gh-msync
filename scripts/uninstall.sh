@@ -10,7 +10,7 @@ echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 if [ ! -f "$HOME/.local/bin/github-sync" ] && [ ! -d "$HOME/.config/github-sync" ]; then
-    echo -e "    \033[1;33mℹ️  GitHub Sync is not currently installed on this system.\033[0m"
+    echo -e "    \033[1;33mGitHub Sync is not currently installed on this system.\033[0m"
     echo ""
     exit 0
 fi

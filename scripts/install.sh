@@ -242,7 +242,7 @@ echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 if [ -f "$HOME/.local/bin/github-sync" ]; then
-    echo -e "    \033[1;33mℹ️  GitHub Sync is already installed. Updating existing installation...\033[0m"
+    echo -e "    \033[1;33mGitHub Sync is already installed. Updating existing installation...\033[0m"
     ACTION_STR="Updated"
 else
     echo -e "    \033[3mConfiguration saved. Preparing your synchronization environment...\033[0m"
