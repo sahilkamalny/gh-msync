@@ -9,6 +9,7 @@
   <img src="demo.gif" alt="GitHub Sync Terminal Recording" width="800">
 </div>
 
+
 Cross-platform Git repository synchronizer with Bash and Powershell backends. Built for macOS, Linux, and Windows.
 
 ## Table of Contents
