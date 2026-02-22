@@ -170,7 +170,7 @@ echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━�
 echo -e "\033[1;32m  ✓  Uninstallation Complete.\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
-echo -e "    \033[1;36mGitHub Sync\033[0m has been successfully removed from your system."
+echo -e "    \033[1;36mGitHub Sync\033[0m has been successfully uninstalled."
 echo ""
 
 if [[ "$OS" == "Darwin" ]]; then

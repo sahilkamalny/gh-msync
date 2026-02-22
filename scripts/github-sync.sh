@@ -182,7 +182,11 @@ for i in "${!repo_paths[@]}"; do
     else
         commit_count=$(git rev-list --count "${before_commits[$i]}..$after_commit" 2>/dev/null || echo "1")
         file_count=$(git diff --name-only "${before_commits[$i]}..$after_commit" 2>/dev/null | wc -l | tr -d ' ')
-        echo -e "${BLUE}...${RESET} ${CYAN}↓ pulled $commit_count commit(s) affecting $file_count file(s) — now synced${RESET}"
+        commit_str="commits"
+        [ "$commit_count" -eq 1 ] && commit_str="commit"
+        file_str="files"
+        [ "$file_count" -eq 1 ] && file_str="file"
+        echo -e "${BLUE}...${RESET} ${CYAN}↓ pulled $commit_count $commit_str affecting $file_count $file_str${RESET}"
     fi
 
     # Clean up temp files
