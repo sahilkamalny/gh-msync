@@ -90,7 +90,7 @@ cat ~/.ssh/id_ed25519.pub        # Linux (copy output manually)
 clip < ~/.ssh/id_ed25519.pub     # Windows
 ```
 
-See the [official GitHub SSH guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) for full details.
+See the [official guide for adding an SSH key to GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) for full details. For troubleshooting or managing the SSH agent, refer to GitHub's [SSH key generation guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
 </details>
 
