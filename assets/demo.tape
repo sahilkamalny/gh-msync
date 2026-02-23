@@ -1,6 +1,6 @@
 Output assets/demo.gif
 
-Set FontSize 25
+Set FontSize 26
 Set LineHeight 1.15
 Set Width 1600
 Set Height 1066
@@ -40,4 +40,4 @@ Sleep 400ms
 Enter
 
 # Hold the final result on screen so the user can admire the output
-Sleep 2s
+Sleep 2.5s
