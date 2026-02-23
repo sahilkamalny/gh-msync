@@ -12,7 +12,7 @@ Type "clear"
 Enter
 Show
 
-Type "ghsync --cli"
+Type "git msync --cli"
 Sleep 500ms
 Enter
 

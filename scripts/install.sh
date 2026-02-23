@@ -1,7 +1,8 @@
 #!/bin/bash
-
+# Git Multi-Sync installer — for from-source and GUI installers (macOS/Linux).
+# Homebrew uses packaging/homebrew/git-msync.rb and does not run this script.
 # ==========================================
-# GitHub Sync - Installer
+# Git Multi-Sync - Installer
 # ==========================================
 
 printf '\033[2J\033[3J\033[H'
@@ -12,14 +13,14 @@ OS="$(uname -s)"
 
 # Define Paths
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCRIPT_PATH="$REPO_DIR/scripts/github-sync.sh"
+SCRIPT_PATH="$REPO_DIR/scripts/git-msync"
 
-CONFIG_DIR="$HOME/.config/github-sync"
+CONFIG_DIR="$HOME/.config/git-msync"
 CONFIG_FILE="$CONFIG_DIR/config"
 mkdir -p "$CONFIG_DIR"
 
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "\033[1;36m  ☯︎  GitHub Sync Installer\033[0m"
+echo -e "\033[1;36m  ☯︎  Git Multi-Sync Installer\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
 
@@ -69,7 +70,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
             if pathString is "" then set pathString to "(None selected. Default configuration will be applied.)"
             
             try
-                set theResult to display dialog "Current Repositories:" & return & return & pathString buttons {"Done", "Remove Folder...", "Add Folder..."} default button "Add Folder..." with title "GitHub Sync Configuration"
+                set theResult to display dialog "Current Repositories:" & return & return & pathString buttons {"Done", "Remove Folder...", "Add Folder..."} default button "Add Folder..." with title "Git Multi-Sync Configuration"
                 
                 if button returned of theResult is "Add Folder..." then
                     set newFolders to choose folder with prompt "Select a repository folder (Hold Command to select multiple):" default location (path to home folder) multiple selections allowed true
@@ -89,7 +90,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
                             set userPaths to newUserPaths
                         end if
                     else
-                        display dialog "There are no folders to remove yet." buttons {"OK"} default button "OK" with title "GitHub Sync Configuration"
+                        display dialog "There are no folders to remove yet." buttons {"OK"} default button "OK" with title "Git Multi-Sync Configuration"
                     end if
                 else if button returned of theResult is "Done" then
                     exit repeat
@@ -132,7 +133,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
                 path_string="(None selected. Default configuration will be applied.)"
             fi
             
-            action=$(zenity --question --title="GitHub Sync Configuration" --text="<b>Current Repositories:</b>\n\n$path_string" --ok-label="Done" --cancel-label="Add Folder..." --extra-button="Remove Folder..." 2>/dev/null)
+            action=$(zenity --question --title="Git Multi-Sync Configuration" --text="<b>Current Repositories:</b>\n\n$path_string" --ok-label="Done" --cancel-label="Add Folder..." --extra-button="Remove Folder..." 2>/dev/null)
             ret=$?
             
             if [ "$action" = "Remove Folder..." ]; then
@@ -160,7 +161,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
                         user_paths_array=("${new_array[@]}")
                     fi
                 else
-                    zenity --info --title="GitHub Sync Configuration" --text="No folders to remove yet." 2>/dev/null
+                    zenity --info --title="Git Multi-Sync Configuration" --text="No folders to remove yet." 2>/dev/null
                 fi
             elif [ $ret -eq 0 ]; then
                 break # Done
@@ -188,7 +189,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
                 path_string="(None selected. Default configuration will be applied.)"
             fi
             
-            kdialog --yesnocancel "Current Repositories:\n\n$path_string" --yes-label "Done" --no-label "Add Folder..." --cancel-label "Remove Folder..." --title "GitHub Sync Configuration" 2>/dev/null
+            kdialog --yesnocancel "Current Repositories:\n\n$path_string" --yes-label "Done" --no-label "Add Folder..." --cancel-label "Remove Folder..." --title "Git Multi-Sync Configuration" 2>/dev/null
             ret=$?
             
             if [ $ret -eq 0 ]; then
@@ -215,7 +216,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
                         user_paths_array=("${new_array[@]}")
                     fi
                 else
-                    kdialog --msgbox "No folders to remove yet." --title "GitHub Sync Configuration" 2>/dev/null
+                    kdialog --msgbox "No folders to remove yet." --title "Git Multi-Sync Configuration" 2>/dev/null
                 fi
             else
                 break
@@ -250,11 +251,11 @@ if [ "$HAS_GUI" -eq 0 ]; then
     echo ""
 fi
 
-if [ -f "$HOME/.local/bin/github-sync" ]; then
-    echo -e "    Configuration saved. Updating \033[1;36mGitHub Sync\033[0m..."
+if [ -f "$HOME/.local/bin/git-msync" ]; then
+    echo -e "    Configuration saved. Updating \033[1;36mGit Multi-Sync\033[0m..."
     ACTION_STR="Updated"
 else
-    echo -e "    Configuration saved. Installing \033[1;36mGitHub Sync\033[0m..."
+    echo -e "    Configuration saved. Installing \033[1;36mGit Multi-Sync\033[0m..."
     ACTION_STR="Generated"
 fi
 echo ""
@@ -294,22 +295,21 @@ chmod +x "$REPO_DIR/scripts/install.sh"
 chmod +x "$REPO_DIR/scripts/uninstall.sh"
 echo -e "    \033[1;32m∘\033[0m Core scripts made executable"
 
-echo -e "    \033[1;32m∘\033[0m Saved configuration to \033[4m~/.config/github-sync/config\033[0m"
+echo -e "    \033[1;32m∘\033[0m Saved configuration to \033[4m~/.config/git-msync/config\033[0m"
 
-# 2. Setup CLI symlink
+# 2. Setup CLI (Git subcommand: git msync)
 LOCAL_BIN="$HOME/.local/bin"
 if [ ! -d "$LOCAL_BIN" ]; then
     mkdir -p "$LOCAL_BIN"
     echo -e "    \033[1;32m∘\033[0m Created local bin directory (\033[4m~/.local/bin\033[0m)"
 fi
 
-ln -sf "$SCRIPT_PATH" "$LOCAL_BIN/github-sync"
-ln -sf "$SCRIPT_PATH" "$LOCAL_BIN/ghsync"
-echo -e "    \033[1;32m∘\033[0m Linked global CLI commands (\033[1mgithub-sync\033[0m, \033[1mghsync\033[0m)"
+ln -sf "$SCRIPT_PATH" "$LOCAL_BIN/git-msync"
+echo -e "    \033[1;32m∘\033[0m Installed Git subcommand (\033[1mgit msync\033[0m)"
 
 # 3. Handle OS-specific App Wrappers
 if [[ "$OS" == "Darwin" ]]; then
-    APP_NAME="GitHub Sync.app"
+    APP_NAME="Git Multi-Sync.app"
     APP_DIR="$REPO_DIR/$APP_NAME"
     
     rm -rf "$APP_DIR"
@@ -318,7 +318,7 @@ if [[ "$OS" == "Darwin" ]]; then
     cat << EOF > "$APP_DIR/Contents/Resources/run.sh"
 #!/bin/bash
 export APP_GUI=1
-"$REPO_DIR/scripts/github-sync.sh"
+"$REPO_DIR/scripts/git-msync"
 
 read -p "Press [Enter] to exit..."
 
@@ -335,18 +335,18 @@ EOF
         cp "/System/Applications/Utilities/Terminal.app/Contents/Resources/Terminal.icns" "$APP_DIR/Contents/Resources/applet.icns"
         touch "$APP_DIR"
     fi
-    echo -e "    \033[1;32m∘\033[0m ${ACTION_STR} macOS App (\033[1;4;37mGitHub Sync.app\033[0m)"
+    echo -e "    \033[1;32m∘\033[0m ${ACTION_STR} macOS App (\033[1;4;37mGit Multi-Sync.app\033[0m)"
 
 elif [[ "$OS" == "Linux" ]]; then
     DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
     mkdir -p "$DESKTOP_ENTRY_DIR"
-    DESKTOP_FILE="$DESKTOP_ENTRY_DIR/github-sync.desktop"
+    DESKTOP_FILE="$DESKTOP_ENTRY_DIR/git-msync.desktop"
     
     cat > "$DESKTOP_FILE" <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=GitHub Sync
+Name=Git Multi-Sync
 Comment=Synchronize all local GitHub repositories
 Exec=$SCRIPT_PATH
 Icon=utilities-terminal
@@ -356,7 +356,7 @@ Keywords=git;github;sync;repository;
 EOF
 
     chmod +x "$DESKTOP_FILE"
-    echo -e "    \033[1;32m∘\033[0m ${ACTION_STR} Linux Application (\033[4mgithub-sync.desktop\033[0m)"
+    echo -e "    \033[1;32m∘\033[0m ${ACTION_STR} Linux Application (\033[4mgit-msync.desktop\033[0m)"
 fi
 
 PATH_INJECTED=0
@@ -396,20 +396,20 @@ echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━�
 echo -e "\033[1;32m  ✓  Installation Complete!\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
-echo -e "    You can now launch it by typing \033[1;36mgithub-sync\033[0m or \033[1;36mghsync\033[0m in your terminal,"
+echo -e "    You can now run \033[1;36mgit msync\033[0m in your terminal (native Git subcommand),"
 if [[ "$OS" == "Darwin" ]]; then
-    echo -e "    or by double-clicking \033[1;4;36mGitHub Sync.app\033[0m in this folder,"
-    echo -e "    or by finding it via Spotlight Search/Launchpad."
+    echo -e "    or double-click \033[1;4;36mGit Multi-Sync.app\033[0m in this folder,"
+    echo -e "    or find it via Spotlight Search / Launchpad."
 elif [[ "$OS" == "Linux" ]]; then
-    echo -e "    or by launching it from your Linux application menu."
+    echo -e "    or launch \033[1mGit Multi-Sync\033[0m from your application menu."
 fi
 echo ""
 
 if [[ "$OS" == "Darwin" ]]; then
-    osascript -e 'display notification "Installation complete. You can now use the github-sync command." with title "GitHub Sync"'
+    osascript -e 'display notification "Installation complete. You can now run git msync." with title "Git Multi-Sync"'
 elif [[ "$OS" == "Linux" ]]; then
     if command -v notify-send >/dev/null; then
-        notify-send "GitHub Sync" "Installation complete. You can now use the github-sync command."
+        notify-send "Git Multi-Sync" "Installation complete. You can now run git msync."
     fi
 fi
 

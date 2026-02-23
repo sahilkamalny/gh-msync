@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # ==========================================
-# Modern GitHub Repository Sync Utility
+# Git Multi-Sync — Repository Sync Utility
 # ==========================================
 
 printf '\033[2J\033[3J\033[H'
 
-CONFIG_DIR="$HOME/.config/github-sync"
+CONFIG_DIR="$HOME/.config/git-msync"
 CONFIG_FILE="$CONFIG_DIR/config"
 
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "\033[1;36m  ☯︎  GitHub Sync\033[0m"
+echo -e "\033[1;36m  ☯︎  Git Multi-Sync\033[0m"
 echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo ""
 
@@ -529,10 +529,10 @@ if command -v gh >/dev/null 2>&1; then
 fi
 
 if [[ "$OS" == "Darwin" ]]; then
-    osascript -e 'display notification "GitHub repository sync complete." with title "Sync Repositories"'
+    osascript -e 'display notification "Repository sync complete." with title "Git Multi-Sync"'
 elif [[ "$OS" == "Linux" ]]; then
     if command -v notify-send >/dev/null; then
-        notify-send "Sync Repositories" "GitHub repository sync complete."
+        notify-send "Git Multi-Sync" "Repository sync complete."
     fi
 fi
 

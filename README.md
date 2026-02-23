@@ -1,16 +1,15 @@
 <div align="center">
 
-# GitHub Sync
+# Git Multi-Sync
 
-**Cross-platform Git repository synchronizer — pull all your repos in parallel with automatic SSH upgrades and native OS integrations.**
+**Native Git subcommand to sync multiple repositories in parallel — `git msync` with automatic SSH upgrades and native OS integrations.**
 
 [![Bash](https://img.shields.io/badge/Bash-5+-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
-[![PowerShell](https://img.shields.io/badge/PowerShell-Windows-5391FE?style=flat-square&logo=powershell&logoColor=white)](https://learn.microsoft.com/en-us/powershell/)
 [![macOS](https://img.shields.io/badge/macOS-Supported-000000?style=flat-square&logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Linux](https://img.shields.io/badge/Linux-Supported-FCC624?style=flat-square&logo=linux&logoColor=black)](https://kernel.org/)
 [![Windows](https://img.shields.io/badge/Windows-Supported-0078D6?style=flat-square&logo=windows&logoColor=white)](https://www.microsoft.com/windows/)
 
-**Built with** Bash · PowerShell · GitHub CLI · AppleScript
+**Built with** Bash · GitHub CLI · AppleScript
 
 [Portfolio](https://sahilkamal.dev) · [LinkedIn](https://linkedin.com/in/sahilkamalny) · [Contact](mailto:sahilkamal.dev@gmail.com)
 
@@ -19,143 +18,226 @@
 ---
 
 <div align="center">
-  <img src="assets/demo.gif" alt="GitHub Sync Terminal Recording" width="800">
+  <img src="assets/demo.gif" alt="Git Multi-Sync Terminal Recording" width="800">
 </div>
+
+---
+
+## Table of contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Uninstallation](#uninstallation)
+- [Project structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
 ## Overview
 
-GitHub Sync is a cross-platform CLI utility that iterates over all local Git repositories and pulls them concurrently using Bash and PowerShell backends. It ships with native OS integrations — a Spotlight-searchable `.app` wrapper on macOS, a `.desktop` launcher on Linux, and a `ghsync` terminal alias — so synchronization is always one keystroke or click away. Automatic SSH remote upgrades, fail-safe rebase protections, and an interactive multi-directory configuration menu are included out of the box.
+Git Multi-Sync (`git-msync`) is a cross-platform utility that runs as a **native Git subcommand**. Run `git msync` from any directory to discover and pull all your local Git repositories in parallel. It ships with a Spotlight-searchable **Git Multi-Sync** app on macOS and a **Git Multi-Sync** launcher on Linux. Automatic HTTPS→SSH remote upgrades, fail-safe rebase protection, and an interactive configuration menu are included.
 
 ---
 
 ## Features
 
-**Parallel Fetching** — Pulls all tracked repositories concurrently, falling back gracefully per-repo if errors occur.
-
-**Fail-Safe Rebase Protection** — Automatically runs `git rebase --abort` on any background job that fails due to merge conflicts or network errors, preventing repositories from being left in a dirty state.
-
-**Auto SSH Upgrades** — Detects `https://` remotes and upgrades them to `git@github.com:` SSH remotes on the fly, bypassing token authentication limits and hardcoded usernames.
-
-**Native OS Integrations** — Generates a Spotlight-searchable macOS `.app` wrapper via AppleScript/Bash and a `.desktop` launcher on Linux desktop environments. Native notification alerts on both platforms.
-
-**Interactive Configuration Menu** — A stateful GUI menu on macOS and Linux for multi-directory tracking, infinite folder selection, and per-folder removal via checkbox lists.
-
-**Animated Terminal UI** — Progress spinner with sequentially resolved concurrent background jobs for a clean terminal experience.
+- **Native Git subcommand** — Install once; run `git msync` from anywhere. No aliases required.
+- **Parallel fetching** — Pulls all tracked repositories concurrently, with per-repo fallback on errors.
+- **Fail-safe rebase protection** — Runs `git rebase --abort` on failed pulls so repositories are never left in a dirty state.
+- **Auto SSH upgrades** — Detects `https://` remotes and upgrades them to `git@github.com:` SSH.
+- **Native OS integrations** — macOS `.app` and Linux `.desktop` launcher (both named **Git Multi-Sync**), with native notifications.
+- **Interactive configuration** — GUI menu on macOS and Linux for multi-directory tracking.
+- **Animated terminal UI** — Progress spinner and sequential result output.
 
 ---
 
 ## Prerequisites
 
-- `git`
-- `bash` (or Git Bash on Windows)
-
-**Optional — Cloning missing repositories**
-
-To detect and clone GitHub repos not yet on your local machine, the GitHub CLI (`gh`) must be installed and authenticated.
-
-```bash
-# Install (choose your platform)
-brew install gh                              # macOS
-sudo apt install gh                          # Debian / Ubuntu
-winget install --id GitHub.cli               # Windows
-
-# Authenticate
-gh auth login
-```
-
-Once authenticated, GitHub Sync will automatically discover your account on the next run and offer to clone any missing repositories.
-
-**Required — SSH key**
-
-> [!IMPORTANT]
-> GitHub Sync upgrades all remotes to SSH, so a GitHub SSH key must be configured on your machine.
+- **Required:** `git`, `bash` (or Git Bash on Windows).
+- **Optional (clone missing repos):** GitHub CLI (`gh`), installed and authenticated (`gh auth login`).
+- **Required for remote access:** A [GitHub SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) — Git Multi-Sync upgrades remotes to SSH.
 
 <details>
-<summary>SSH key setup instructions</summary>
-<br>
-
-Generate a key:
+<summary>SSH key setup (click to expand)</summary>
 
 ```bash
 ssh-keygen -t ed25519 -C "your_email@example.com"
+# Accept default path, then add the public key to GitHub:
+# macOS: pbcopy < ~/.ssh/id_ed25519.pub
+# Linux:  cat ~/.ssh/id_ed25519.pub   (copy manually)
+# Windows: clip < ~/.ssh/id_ed25519.pub
 ```
-
-Press Enter to accept the default path and optionally set a passphrase. Then copy your public key and add it to GitHub under **Settings → SSH and GPG keys → New SSH key**:
-
-```bash
-pbcopy < ~/.ssh/id_ed25519.pub   # macOS
-cat ~/.ssh/id_ed25519.pub        # Linux (copy output manually)
-clip < ~/.ssh/id_ed25519.pub     # Windows
-```
-
-See the [official guide for adding an SSH key to GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) for full details. For troubleshooting or managing the SSH agent, refer to GitHub's [SSH key generation guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
 </details>
 
 ---
 
+## Quick start
+
+1. **Install** (choose one):
+   - **Homebrew (macOS):** `brew install <your-tap>/git-msync` (once the formula is in a tap).
+   - **From source:** Clone this repo and run `./scripts/install.sh` (or double-click `macOS-Install.command` / `Linux-Install.sh` on supported platforms).
+2. **Run:** `git msync` from any directory.
+3. **Configure (optional):** Add repository root paths to `~/.config/git-msync/config` (one path per line), or use the installer’s GUI. Default is `~/GitHub`.
+
+---
+
 ## Installation
 
-| Platform | Method |
-|---|---|
-| macOS | Double-click `macOS-Install.command` |
-| Linux | Double-click `Linux-Install.sh` |
-| Windows | Git Bash / WSL — generic install script (dedicated installer coming soon) |
-| Terminal (any) | `./scripts/install.sh` from the repo root |
+### Option A: Homebrew (macOS, recommended when available)
 
-The installer will automatically make scripts executable, symlink the `github-sync` CLI and `ghsync` alias to `~/.local/bin/`, configure your active shell's `$PATH`, and generate the macOS `.app` wrapper or Linux `.desktop` launcher.
+When the formula is published to a Homebrew tap:
+
+```bash
+brew install <your-tap>/git-msync
+```
+
+- The binary is installed to your Homebrew prefix (e.g. `/usr/local/bin` or `/opt/homebrew/bin`) as `git-msync`.
+- Git will run it for `git msync` automatically.
+- No GUI installer is run; configure paths via `~/.config/git-msync/config` or by passing directories to `git msync` (see [Configuration](#configuration) and [Usage](#usage)).
+
+To **uninstall**:
+
+```bash
+brew uninstall git-msync
+```
+
+Remove `~/.config/git-msync` manually if you want to delete configuration.
+
+### Option B: From source (all platforms)
+
+| Platform   | Method |
+|-----------|--------|
+| **macOS** | Double-click `macOS-Install.command` in the repo root. |
+| **Linux** | Double-click `Linux-Install.sh` (or run it in a terminal). |
+| **Any**   | From repo root: `./scripts/install.sh` |
+
+The installer will:
+
+1. Create `~/.config/git-msync` and optionally prompt for repository paths (GUI or CLI).
+2. Make `scripts/git-msync` executable and symlink it to `~/.local/bin/git-msync`.
+3. Ensure `~/.local/bin` is on your `PATH` (by appending to your shell rc file if needed).
+4. On macOS: create **Git Multi-Sync.app** in the repo directory (you can move it to Applications or the Desktop).
+5. On Linux: create a **Git Multi-Sync** desktop entry in `~/.local/share/applications`.
+
+After installation, run `git msync` from any directory. You can also launch **Git Multi-Sync** from Spotlight (macOS) or the application menu (Linux).
+
+---
+
+## Configuration
+
+- **Config file:** `~/.config/git-msync/config`
+- **Format:** One filesystem path per line. Each path is a directory that contains one or more Git repositories (e.g. `~/GitHub` or `~/Projects`). Blank lines and lines starting with `#` are ignored.
+- **Default:** If the file is missing or empty, `~/GitHub` is used.
+
+You can edit the file by hand or re-run the from-source installer to use the GUI again. Paths passed on the command line override the config file (see [Usage](#usage)).
 
 ---
 
 ## Usage
 
-**Launch**
-
-Once installed, start a sync via any of the following:
-- macOS Spotlight or Launchpad — search **GitHub Sync**
-- Linux application menu — launch **GitHub Sync**
-- Terminal — type `github-sync` or `ghsync` from any directory
-
-By default, the script looks for repositories in `~/GitHub`.
-
-**Headless / CLI mode**
-
-Bypass all graphical prompts (AppleScript, Zenity, kdialog) and fall back to a standard Bash prompt:
+### Basic
 
 ```bash
-ghsync --cli
+git msync
+```
+
+Uses paths from `~/.config/git-msync/config` (or `~/GitHub` if unset), pulls all repos in parallel, and optionally prompts to clone missing repositories if `gh` is installed and authenticated.
+
+### Headless / CLI only
+
+Disable GUI dialogs and use terminal prompts only:
+
+```bash
+git msync --cli
 # or
-ghsync --headless
+git msync --headless
 ```
 
-**Custom paths**
+### Override paths
 
-Pass one or more directories as arguments to override the configured paths on the fly:
+Use specific directories for one run (ignores config file):
 
 ```bash
-ghsync ~/ClientCode ~/SecondaryDrive
+git msync ~/ClientCode ~/SecondaryDrive
 ```
+
+### Direct binary
+
+If the binary is on your `PATH`, you can also run:
+
+```bash
+git-msync
+```
+
+Behavior is the same; `git msync` is the preferred interface.
 
 ---
 
 ## Uninstallation
 
-Removes the CLI symlink, desktop launcher, and configuration at `~/.config/github-sync`.
+- **If you installed via Homebrew:**  
+  `brew uninstall git-msync`  
+  Optionally remove `~/.config/git-msync`.
 
-| Platform | Method |
-|---|---|
-| macOS | Double-click `macOS-Uninstall.command` |
-| Linux | Double-click `Linux-Uninstall.sh` |
-| Windows | Remove manually via Git Bash or WSL |
-| Terminal (any) | `./scripts/uninstall.sh` |
+- **If you installed from source (install script or macOS/Linux installers):**  
+  - **macOS:** Double-click `macOS-Uninstall.command`.  
+  - **Linux:** Double-click `Linux-Uninstall.sh` or run it in a terminal.  
+  - **Any:** From repo root: `./scripts/uninstall.sh`.
+
+The from-source uninstaller removes:
+
+- The `git-msync` symlink (or binary) from `~/.local/bin`
+- Any PATH line it added to your shell rc
+- `~/.config/git-msync`
+- The **Git Multi-Sync** app and desktop launcher (from the repo and from standard locations if you moved them)
+
+---
+
+## Project structure
+
+| Path | Purpose |
+|------|--------|
+| `scripts/git-msync` | Main executable (no extension; Git runs it as `git msync`). |
+| `scripts/install.sh` | From-source installer (symlink, config, app/desktop). |
+| `scripts/uninstall.sh` | From-source uninstaller. |
+| `macOS-Install.command` | macOS entry point → runs `scripts/install.sh`. |
+| `Linux-Install.sh` | Linux entry point → runs `scripts/install.sh`. |
+| `macOS-Uninstall.command` / `Linux-Uninstall.sh` | Entry points → run `scripts/uninstall.sh`. |
+| `packaging/homebrew/git-msync.rb` | Homebrew formula (installs only the binary; does not run `install.sh`). |
+| `assets/` | Demo assets (e.g. `demo.tape`, `demo.gif`). |
+
+---
+
+## Troubleshooting
+
+- **`git msync` not found**  
+  Ensure the directory containing `git-msync` is on your `PATH`. For from-source installs, that is usually `~/.local/bin`. Restart the terminal or run `source ~/.zshrc` (or your shell rc) after installing.
+
+- **Repos not found**  
+  Check that paths in `~/.config/git-msync/config` exist and contain directories with a `.git` subdirectory. Or pass paths explicitly: `git msync /path/to/parent`.
+
+- **Permission denied**  
+  Ensure the script is executable: `chmod +x scripts/git-msync`. The installer does this automatically.
+
+- **Clone step not offered**  
+  Install and log in to the GitHub CLI: `brew install gh && gh auth login`. Git Multi-Sync uses it to list and clone missing repos.
+
+- **SSH errors**  
+  Configure a GitHub SSH key and add it to your account. Git Multi-Sync upgrades HTTPS remotes to SSH.
 
 ---
 
 ## Contributing
 
-Pull requests are welcome. For bugs or feature requests, please open an issue.
+Pull requests and issues are welcome. For bugs or feature requests, please open an issue.
 
 ---
 
