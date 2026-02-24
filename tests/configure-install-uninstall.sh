@@ -201,8 +201,110 @@ EOF_UNINST
     pass "Linux-Uninstall.sh falls back to direct scripts/uninstall.sh when no terminal app is available"
 }
 
+scenario_linux_wrapper_terminal_dispatch_matrix() {
+    local app_dir install_log uninstall_log
+
+    app_dir="$TMP_ROOT/linux-wrapper-terminal-matrix-app"
+    install_log="$TMP_ROOT/linux-wrapper-terminal-matrix-install.log"
+    uninstall_log="$TMP_ROOT/linux-wrapper-terminal-matrix-uninstall.log"
+    mkdir -p "$app_dir/scripts"
+
+    cp "$REPO_DIR/Linux-Install.sh" "$app_dir/Linux-Install.sh"
+    cp "$REPO_DIR/Linux-Uninstall.sh" "$app_dir/Linux-Uninstall.sh"
+
+    cat > "$app_dir/scripts/install.sh" <<EOF_INST
+#!/bin/bash
+printf '%s\n' "\$*" >> "$install_log"
+exit 0
+EOF_INST
+    cat > "$app_dir/scripts/uninstall.sh" <<EOF_UNINST
+#!/bin/bash
+printf '%s\n' "\$*" >> "$uninstall_log"
+exit 0
+EOF_UNINST
+    chmod +x "$app_dir/scripts/install.sh" "$app_dir/scripts/uninstall.sh"
+
+    make_terminal_stub() {
+        local dir="$1"
+        local terminal_name="$2"
+        local log_file="$3"
+        cat > "$dir/$terminal_name" <<EOF_TERM
+#!/bin/bash
+printf '%s:%s\n' "$terminal_name" "\$*" >> "$log_file"
+exit 0
+EOF_TERM
+        chmod +x "$dir/$terminal_name"
+    }
+
+    run_terminal_case() {
+        local terminal_name="$1"
+        local expected_fragment="$2"
+        local case_key="${terminal_name//[^A-Za-z0-9]/_}"
+        local stub_dir="$TMP_ROOT/linux-wrapper-${case_key}-stubs"
+        local terminal_log="$TMP_ROOT/linux-wrapper-${case_key}.log"
+        local status
+
+        rm -rf "$stub_dir"
+        mkdir -p "$stub_dir"
+        : > "$terminal_log"
+        rm -f "$install_log" "$uninstall_log"
+
+        make_terminal_stub "$stub_dir" "$terminal_name" "$terminal_log"
+
+        set +e
+        PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Install.sh" --cli > /dev/null 2>&1
+        status=$?
+        set -e
+        assert_status "$status" 0
+        assert_file_contains "$terminal_log" "$expected_fragment"
+        assert_not_exists "$install_log"
+
+        set +e
+        PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Uninstall.sh" --cli > /dev/null 2>&1
+        status=$?
+        set -e
+        assert_status "$status" 0
+        assert_file_contains "$terminal_log" "$expected_fragment"
+        assert_not_exists "$uninstall_log"
+    }
+
+    run_terminal_case "kgx" "kgx:-- bash "
+    run_terminal_case "xfce4-terminal" "xfce4-terminal:--command bash "
+    run_terminal_case "mate-terminal" "mate-terminal:-e bash "
+    run_terminal_case "alacritty" "alacritty:-e bash "
+    run_terminal_case "kitty" "kitty:bash "
+    run_terminal_case "wezterm" "wezterm:start -- bash "
+    run_terminal_case "footclient" "footclient:-e bash "
+    run_terminal_case "foot" "foot:-e bash "
+    run_terminal_case "x-terminal-emulator" "x-terminal-emulator:-e bash "
+    pass "Linux wrappers dispatch to expanded terminal launcher set without falling back"
+
+    # Ensure detection order prefers modern GNOME Console (kgx) before gnome-terminal.
+    local order_stub_dir order_log status
+    order_stub_dir="$TMP_ROOT/linux-wrapper-order-stubs"
+    order_log="$TMP_ROOT/linux-wrapper-order.log"
+    rm -rf "$order_stub_dir"
+    mkdir -p "$order_stub_dir"
+    : > "$order_log"
+    rm -f "$install_log"
+
+    make_terminal_stub "$order_stub_dir" "kgx" "$order_log"
+    make_terminal_stub "$order_stub_dir" "gnome-terminal" "$order_log"
+
+    set +e
+    PATH="$order_stub_dir:$BASE_PATH" bash "$app_dir/Linux-Install.sh" --cli > /dev/null 2>&1
+    status=$?
+    set -e
+    assert_status "$status" 0
+    assert_file_contains "$order_log" "kgx:-- bash "
+    assert_file_not_contains "$order_log" "gnome-terminal:"
+    assert_not_exists "$install_log"
+    pass "Linux wrapper terminal detection prefers kgx before gnome-terminal"
+}
+
 scenario_configure_paths_cli
 scenario_install_uninstall_lifecycle
 scenario_linux_wrapper_fallback_dispatch
+scenario_linux_wrapper_terminal_dispatch_matrix
 
 printf 'CONFIGURE/INSTALL/UNINSTALL TESTS COMPLETE (%s)\n' "$TMP_ROOT"

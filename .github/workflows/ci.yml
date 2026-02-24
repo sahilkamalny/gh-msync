@@ -26,7 +26,7 @@ jobs:
       - name: Install actionlint (pinned)
         run: |
           curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.8/scripts/download-actionlint.bash \
-            | bash -s -- -b /usr/local/bin v1.7.8
+            | bash -s -- 1.7.8 /usr/local/bin
 
       - name: Run actionlint
         run: actionlint
