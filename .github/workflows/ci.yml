@@ -18,8 +18,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Install actionlint (pinned)
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.8/scripts/download-actionlint.bash \
+            | bash -s -- -b /usr/local/bin v1.7.8
+
       - name: Run actionlint
-        uses: rhysd/actionlint@v1
+        run: actionlint
 
   test:
     name: Tests (${{ matrix.os }})
