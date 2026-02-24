@@ -32,7 +32,6 @@
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-- [Optional Git Alias](#optional-git-alias)
 - [Uninstallation](#uninstallation)
 - [Project structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
@@ -43,7 +42,7 @@
 
 ## Overview
 
-GitHub Multi-Sync (`gh-msync`) is a cross-platform utility for syncing local Git repositories in parallel. Run `gh-msync` from any directory to discover and pull repositories under your configured folders. If you install it as a GitHub CLI extension, run `gh msync`. It ships with a Spotlight-searchable **GitHub Multi-Sync** app on macOS and a **GitHub Multi-Sync** launcher on Linux.
+GitHub Multi-Sync (`gh-msync`) is a cross-platform utility for syncing local Git repositories in parallel. Run `gh-msync` from any directory to discover and pull repositories under your configured folders. If you install it as a GitHub CLI extension, run `gh msync`. Across install methods, it can create a Spotlight-searchable **GitHub Multi-Sync** app on macOS and a **GitHub Multi-Sync** launcher on Linux.
 
 ---
 
@@ -52,7 +51,7 @@ GitHub Multi-Sync (`gh-msync`) is a cross-platform utility for syncing local Git
 - **Flexible invocation** — Run `gh-msync` directly, or as `gh msync` when installed as a GitHub CLI extension.
 - **Parallel fetching** — Pulls all tracked repositories concurrently, with per-repo fallback on errors.
 - **Fail-safe rebase protection** — Runs `git rebase --abort` on failed pulls so repositories are never left in a dirty state.
-- **Auto SSH upgrades** — Detects `https://` remotes and upgrades them to `git@github.com:` SSH (optional per run).
+- **Auto SSH upgrades (optional)** — Detects `https://` remotes and upgrades them to `git@github.com:` SSH by default, with an HTTPS mode available.
 - **Native OS integrations** — macOS `.app` and Linux `.desktop` launcher (both named **GitHub Multi-Sync**), with native notifications.
 - **Interactive configuration** — GUI menu on macOS and Linux for multi-directory tracking.
 - **Animated terminal UI** — Progress spinner and sequential result output.
@@ -62,11 +61,12 @@ GitHub Multi-Sync (`gh-msync`) is a cross-platform utility for syncing local Git
 ## Prerequisites
 
 - **Required:** `git`, `bash` (or Git Bash on Windows).
-- **Optional (clone missing repos):** GitHub CLI (`gh`), installed and authenticated (`gh auth login`).
-- **Required for remote access:** A [GitHub SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) — GitHub Multi-Sync upgrades remotes to SSH.
+- **Optional (clone missing repos / `gh msync` extension mode):** GitHub CLI (`gh`), installed and authenticated (`gh auth login`).
+- **Optional (recommended):** A [GitHub SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) for passwordless/private-repo Git operations and automatic HTTPS→SSH remote upgrades.
+- **No SSH key?** The tool still works in HTTPS mode (`--no-ssh-upgrade`). Public repos usually pull without prompts; private HTTPS repos may prompt unless your Git credential helper/PAT is already configured.
 
 <details>
-<summary>SSH key setup (click to expand)</summary>
+<summary>Optional SSH key setup (recommended)</summary>
 
 ```bash
 ssh-keygen -t ed25519 -C "your_email@example.com"
@@ -86,20 +86,32 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
    - **Homebrew (macOS & Linux):** `brew install sahilkamalny/homebrew-tap/gh-msync`
    - **GitHub CLI extension:** `gh extension install sahilkamalny/gh-msync`
    - **From source:** Clone this repo and run `./scripts/install.sh` (or double-click `macOS-Install.command` / `Linux-Install.sh` on supported platforms).
-2. **Run:** `gh-msync` from any directory (or `gh msync` if installed as a GitHub CLI extension).
-3. **Configure paths (optional):** Run `gh-msync --configure` to pick directories in a GUI or at the terminal. You can also edit `~/.config/gh-msync/config` (one path per line). Default is `~/GitHub`.
+2. **Run:** `gh-msync` (or `gh msync` in extension mode).
+3. **Configure paths (optional):** `gh-msync --configure` (or `gh msync --configure`).
+
+Desktop integration (all install methods): the macOS app / Linux launcher is auto-created on first interactive run, or you can create it explicitly with `gh-msync --install-integrations` (or `gh msync --install-integrations`).
 
 Command by install method:
 
-| Install method | Command to run | Installs standalone `gh-msync` on PATH |
+| Install method | Run command | Standalone `gh-msync` on PATH |
 |---|---|---|
 | Homebrew | `gh-msync` | Yes |
 | From source installer | `gh-msync` | Yes (`~/.local/bin/gh-msync`) |
 | GitHub CLI extension | `gh msync` | No |
 
+For install-method details (PATH behavior, app/launcher behavior, uninstall steps), see [Installation](#installation) and [Uninstallation](#uninstallation).
+
 ---
 
 ## Installation
+
+### Shared desktop integrations (all install methods)
+
+The macOS app (`~/Applications/GitHub Multi-Sync.app`) and Linux launcher (`~/.local/share/applications/gh-msync.desktop`) are managed the same way across install methods:
+
+- They are auto-created on the first interactive run.
+- You can create/update them manually with `gh-msync --install-integrations` (or `gh msync --install-integrations`).
+- You can remove them with `gh-msync --uninstall-integrations` (or `gh msync --uninstall-integrations`).
 
 ### Option A: Homebrew (macOS & Linux, recommended when available)
 
@@ -111,25 +123,20 @@ Install with one command (Homebrew taps the repo automatically):
 brew install sahilkamalny/homebrew-tap/gh-msync
 ```
 
-If they have already run `brew tap sahilkamalny/homebrew-tap`, they can use:
+If you already tapped the repo:
 
 ```bash
 brew install gh-msync
 ```
 
-- The binary is installed to your Homebrew prefix (e.g. `/opt/homebrew/bin` on Apple Silicon, `/usr/local/bin` on Intel, or Linux Homebrew’s prefix) as `gh-msync`.
-- If `gh-msync` is not found right after install, initialize your shell with Homebrew’s environment first (for example: `eval "$(/opt/homebrew/bin/brew shellenv)"` on Apple Silicon, or the path printed by `brew shellenv` on your system).
-- A default config is created at `~/.config/gh-msync/config` with `~/GitHub` if it doesn’t exist. To choose your directories the same way as the from-source installer (GUI or CLI), run **`gh-msync --configure`** (or `gh-msync --configure --cli` for terminal-only). See [Configuration](#configuration).
-- Homebrew does not create the **GitHub Multi-Sync** macOS app or Linux desktop launcher; use the from-source installer (Option B) if you want those. Path configuration is identical: `gh-msync --configure`.
-- `gh` is optional for Homebrew installs. Install and log in (`brew install gh && gh auth login`) only if you want missing-repository cloning prompts or extension mode (`gh msync`).
+Notes:
 
-To uninstall Homebrew-managed files:
-
-```bash
-brew uninstall gh-msync
-```
-
-This removes the Homebrew-installed binary/formula files. If you also want user-data/artifact cleanup, remove `~/.config/gh-msync` and any from-source artifacts manually (or run `./scripts/uninstall.sh` from a clone of this repo).
+- Installs `gh-msync` into your Homebrew prefix (for example `/opt/homebrew/bin` on Apple Silicon, `/usr/local/bin` on Intel Macs, or your Linux Homebrew prefix).
+- If `gh-msync` is not found immediately after install, initialize your shell with Homebrew's environment (for example `eval "$('/opt/homebrew/bin/brew' shellenv)"` on Apple Silicon, or use the path printed by `brew shellenv`).
+- Creates a default config at `~/.config/gh-msync/config` with `~/GitHub` if it does not exist.
+- Supports the same GUI/CLI path picker as other install methods via `gh-msync --configure` (or `gh-msync --configure --cli`).
+- Auto-installs the same macOS/Linux launcher integrations used by other install methods (and supports `gh-msync --install-integrations` / `gh-msync --uninstall-integrations`).
+- `gh` is optional. Install and log in (`brew install gh && gh auth login`) only if you want missing-repository cloning prompts or extension mode (`gh msync`).
 
 ### Option B: From source (all platforms)
 
@@ -144,10 +151,11 @@ The installer will:
 1. Create `~/.config/gh-msync` and optionally prompt for repository paths (GUI or CLI).
 2. Make `scripts/gh-msync` executable and symlink it to `~/.local/bin/gh-msync`.
 3. Ensure `~/.local/bin` is on your `PATH` (by appending to your shell rc file if needed).
-4. On macOS: create **GitHub Multi-Sync.app** in the repo directory (you can move it to Applications or the Desktop).
-5. On Linux: create a **GitHub Multi-Sync** desktop entry in `~/.local/share/applications`.
+4. Install the same shared launcher integrations used by all install methods:
+   - macOS app: `~/Applications/GitHub Multi-Sync.app`
+   - Linux launcher: `~/.local/share/applications/gh-msync.desktop`
 
-After installation, run `gh-msync` from any directory. You can also launch **GitHub Multi-Sync** from Spotlight (macOS) or the application menu (Linux).
+After installation, run `gh-msync` from any directory. You can also launch **GitHub Multi-Sync** from Spotlight/Launchpad (macOS) or the application menu (Linux).
 
 ### Option C: GitHub CLI extension (`gh msync`)
 
@@ -163,8 +171,7 @@ Run it as:
 gh msync
 ```
 
-Extension mode uses the same core script and supports the same flags (for example `gh msync --configure` and `gh msync --cli`).
-It does **not** install a standalone `gh-msync` binary onto your PATH.
+Extension mode uses the same core script and supports the same flags (for example `gh msync --configure`, `gh msync --cli`, `gh msync --install-integrations`, and `gh msync --uninstall-integrations`). It does **not** install a standalone `gh-msync` binary onto your `PATH`.
 
 ---
 
@@ -215,6 +222,24 @@ gh-msync --configure --cli    # terminal prompts only
 
 Saves chosen directories to `~/.config/gh-msync/config` so future `gh-msync` runs use them automatically.
 
+Extension equivalent: `gh msync --configure`.
+
+### Desktop app / launcher integrations (all install methods)
+
+```bash
+gh-msync --install-integrations
+gh-msync --uninstall-integrations
+```
+
+Extension equivalents:
+
+```bash
+gh msync --install-integrations
+gh msync --uninstall-integrations
+```
+
+These create/remove the shared macOS app (`~/Applications/GitHub Multi-Sync.app`) or Linux launcher (`~/.local/share/applications/gh-msync.desktop`) regardless of how you installed the tool.
+
 ### Headless / CLI only
 
 Disable GUI dialogs and use terminal prompts only:
@@ -225,25 +250,40 @@ gh-msync --cli
 gh-msync --headless
 ```
 
-### SSH remote behavior
+### SSH / HTTPS behavior (canonical)
 
-By default, GitHub HTTPS remotes are upgraded to SSH.
+By default, GitHub HTTPS remotes are upgraded to SSH **if they are GitHub remotes**. This is a convenience default, not a hard requirement.
+
+Use HTTPS mode (no SSH conversion):
 
 ```bash
 gh-msync --no-ssh-upgrade
 ```
 
-Or disable globally for your shell session:
+Or disable SSH upgrades for your shell session:
 
 ```bash
 export GH_MSYNC_NO_SSH_UPGRADE=1
 ```
 
-If you have disabled upgrades globally, you can re-enable them for one run:
+If you disabled upgrades globally, re-enable them for one run:
 
 ```bash
 gh-msync --ssh-upgrade
 ```
+
+What changes in HTTPS mode:
+
+- Existing GitHub HTTPS remotes stay on HTTPS (SSH remotes are left unchanged).
+- Missing-repo cloning (when using `gh`) also uses HTTPS clone URLs instead of SSH.
+- Public repos usually pull without prompts.
+- Private HTTPS repos may prompt for credentials unless Git already has a credential helper/token configured.
+
+Benefits of using SSH (recommended, not required):
+
+- Fewer credential prompts for private repos.
+- Consistent GitHub remote URLs across your local repos.
+- Better fit for long-term developer workflows (especially when switching machines/shells).
 
 ### Override paths
 
@@ -253,37 +293,57 @@ Use specific directories for one run (ignores config file):
 gh-msync ~/ClientCode ~/SecondaryDrive
 ```
 
-## Optional Git Alias
-
-If you want `git msync` muscle memory, add a Git alias explicitly (opt-in):
-
-```bash
-git config --global alias.msync '!f(){ gh msync "$@" 2>/dev/null || gh-msync "$@"; }; f'
-```
-
-Notes:
-- This is optional and is not configured automatically by installers.
-- This forwards all flags/arguments (for example `git msync --cli`).
-- This tries extension mode first (`gh msync`) and falls back to standalone mode (`gh-msync`).
-
 ---
 
 ## Uninstallation
 
-Cleanup behavior depends on install method:
+Cleanup depends on install method, but the macOS/Linux launcher cleanup is shared across all of them.
 
-- **If you installed via Homebrew (removes Homebrew-managed files):**  
-  ```bash
-  brew uninstall gh-msync
-  ```  
-  Optional manual cleanup after that: remove `~/.config/gh-msync`, any old `~/.local/bin/gh-msync` symlink, and any app/desktop files created by from-source installs.
+### Shared launcher cleanup (all install methods)
 
-- **If you installed from source (install script or macOS/Linux installers, complete cleanup):**  
-  - **macOS:** Double-click `macOS-Uninstall.command`.  
-  - **Linux:** Double-click `Linux-Uninstall.sh` or run it in a terminal.  
-  - **Any:** From repo root: `./scripts/uninstall.sh`.
+Before removing the package/extension (while the command still exists), remove the shared launcher integrations if you want a full UI cleanup:
 
-The from-source uninstaller removes the same set of items (including the app in the repo directory if it still exists there).
+```bash
+gh-msync --uninstall-integrations
+# or (extension mode)
+gh msync --uninstall-integrations
+```
+
+This removes the macOS app (`~/Applications/GitHub Multi-Sync.app`) and/or Linux launcher (`~/.local/share/applications/gh-msync.desktop`) plus related desktop artifacts.
+
+### Homebrew installs
+
+Remove Homebrew-managed files:
+
+```bash
+brew uninstall gh-msync
+```
+
+Optional full user-data cleanup after that:
+
+```bash
+rm -rf ~/.config/gh-msync
+```
+
+### GitHub CLI extension installs (`gh msync`)
+
+Remove the extension entrypoint:
+
+```bash
+gh extension remove msync
+```
+
+This removes the GitHub CLI extension. Your config at `~/.config/gh-msync` is typically left in place (remove it manually if you want a full cleanup).
+
+### From-source installs (install script / macOS/Linux installers)
+
+Use the platform installer wrappers or the script directly:
+
+- **macOS:** Double-click `macOS-Uninstall.command`
+- **Linux:** Double-click `Linux-Uninstall.sh` (or run it in a terminal)
+- **Any:** From repo root: `./scripts/uninstall.sh`
+
+The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if it added one), config, shared launcher integrations, and legacy app artifacts from older installs.
 
 ---
 
@@ -293,12 +353,13 @@ The from-source uninstaller removes the same set of items (including the app in 
 |------|--------|
 | `scripts/gh-msync` | Main executable used by direct runs and installer-created app/desktop launchers. |
 | `gh-msync` | GitHub CLI extension entrypoint (`gh msync`). |
-| `scripts/install.sh` | From-source installer (symlink, config, app/desktop). |
-| `scripts/uninstall.sh` | From-source uninstaller. |
+| `scripts/install.sh` | From-source installer (symlink, config, PATH, shared app/desktop integrations). |
+| `scripts/uninstall.sh` | From-source uninstaller (including shared app/desktop integration cleanup). |
+| `scripts/system-integrations.sh` | Shared macOS/Linux app/launcher installer/uninstaller used across install methods. |
 | `macOS-Install.command` | macOS entry point → runs `scripts/install.sh`. |
 | `Linux-Install.sh` | Linux entry point → runs `scripts/install.sh`. |
 | `macOS-Uninstall.command` / `Linux-Uninstall.sh` | Entry points → run `scripts/uninstall.sh`. |
-| `packaging/homebrew/gh-msync.rb` | Homebrew formula (installs only the binary; does not run `install.sh`). |
+| `packaging/homebrew/gh-msync.rb` | Homebrew formula (installs the binary + helper scripts, and auto-installs shared launcher integrations). |
 | `assets/` | Demo assets (e.g. `demo.tape`, `demo.gif`). |
 
 ---
@@ -317,11 +378,14 @@ The from-source uninstaller removes the same set of items (including the app in 
 - **Clone step not offered**  
   Install and log in to the GitHub CLI: `brew install gh && gh auth login`. GitHub Multi-Sync uses it to list and clone missing repos.
 
-- **SSH errors**  
-  Configure a GitHub SSH key and add it to your account. GitHub Multi-Sync upgrades HTTPS remotes to SSH.
+- **macOS app / Linux launcher missing**  
+  Run `gh-msync --install-integrations` (or `gh msync --install-integrations` in extension mode) to create or refresh the shared launcher integrations.
 
-- **Don’t want remotes auto-converted to SSH**  
-  Run with `gh-msync --no-ssh-upgrade`, or set `GH_MSYNC_NO_SSH_UPGRADE=1` in your shell environment.
+- **SSH errors**  
+  SSH is optional. If you want SSH mode, configure a GitHub SSH key and keep the default behavior. If you do not want SSH, run with `gh-msync --no-ssh-upgrade` (or set `GH_MSYNC_NO_SSH_UPGRADE=1`) to keep HTTPS remotes/clones.
+
+- **HTTPS prompts for credentials**  
+  This is expected for private repos unless your Git credential helper/PAT is already configured. Use SSH (recommended) or configure Git credentials for HTTPS.
 
 ---
 

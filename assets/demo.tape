@@ -16,28 +16,29 @@ Type "clear"
 Enter
 Show
 
+Sleep 400ms
 Type "gh-msync --cli"
 Sleep 400ms
 Enter
 
 # Reduced to keep the momentum going (adjust only if your CLI actually takes longer to load)
-Sleep 3s
+Sleep 3.1s
 
 Type "y"
 Sleep 400ms
 Enter
 
-Sleep 2.5s
+Sleep 2.6s
 
 Type "1, 2"
 Sleep 400ms
 Enter
 
-Sleep 2s
+Sleep 1.9s
 
 Type "2"
 Sleep 400ms
 Enter
 
 # Hold the final result on screen so the user can admire the output
-Sleep 2.5s
+Sleep 3.1s

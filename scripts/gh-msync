@@ -24,6 +24,38 @@ resolve_script_dir() {
     cd -P "$(dirname "$source")" && pwd
 }
 
+resolve_support_script() {
+    local script_name="$1"
+    local script_dir prefix candidate
+
+    script_dir="$(resolve_script_dir)"
+
+    candidate="$script_dir/$script_name"
+    if [ -x "$candidate" ]; then
+        printf '%s' "$candidate"
+        return 0
+    fi
+
+    candidate="$script_dir/../libexec/$script_name"
+    if [ -x "$candidate" ]; then
+        printf '%s' "$candidate"
+        return 0
+    fi
+
+    if command -v brew >/dev/null 2>&1; then
+        prefix="$(brew --prefix gh-msync 2>/dev/null)"
+        if [ -n "$prefix" ]; then
+            candidate="$prefix/libexec/$script_name"
+            if [ -x "$candidate" ]; then
+                printf '%s' "$candidate"
+                return 0
+            fi
+        fi
+    fi
+
+    return 1
+}
+
 trim_whitespace() {
     local value="$1"
     value="${value#"${value%%[![:space:]]*}"}"
@@ -63,6 +95,69 @@ expand_home_path() {
     esac
 }
 
+normalize_github_remote_key() {
+    local url="$1"
+    local path=""
+
+    case "$url" in
+        https://github.com/*)
+            path="${url#https://github.com/}"
+            ;;
+        http://github.com/*)
+            path="${url#http://github.com/}"
+            ;;
+        ssh://git@github.com/*)
+            path="${url#ssh://git@github.com/}"
+            ;;
+        git@github.com:*)
+            path="${url#git@github.com:}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    path="${path%%\?*}"
+    path="${path%%#*}"
+    path="${path%/}"
+    path="${path%.git}"
+    [ -n "$path" ] || return 1
+    printf '%s' "$(printf '%s' "$path" | tr '[:upper:]' '[:lower:]')"
+}
+
+run_system_integrations() {
+    local action="$1"
+    shift
+    local helper=""
+
+    helper="$(resolve_support_script "system-integrations.sh" 2>/dev/null || true)"
+    [ -n "$helper" ] || return 1
+    "$helper" "$action" "$@"
+}
+
+needs_system_integrations_setup() {
+    local os
+    [ -x "$CONFIG_DIR/integrations/launch.sh" ] || return 0
+
+    os="$(uname -s)"
+    if [[ "$os" == "Darwin" ]]; then
+        [ -d "$HOME/Applications/GitHub Multi-Sync.app" ] || return 0
+    elif [[ "$os" == "Linux" ]]; then
+        [ -f "$HOME/.local/share/applications/gh-msync.desktop" ] || return 0
+    fi
+
+    return 1
+}
+
+ensure_system_integrations() {
+    if [[ "${GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP:-0}" == "1" ]]; then
+        return 0
+    fi
+    [ "${IS_TTY:-0}" -eq 1 ] || return 0
+    needs_system_integrations_setup || return 0
+    run_system_integrations install --quiet --preferred-script "$0" >/dev/null 2>&1 || true
+}
+
 print_usage() {
     cat <<'EOF'
 Usage: gh-msync [options] [repo-root ...]
@@ -70,23 +165,34 @@ Usage: gh-msync [options] [repo-root ...]
 (GitHub Multi-Sync) Sync local Git repositories in parallel.
 
 Options:
-  --configure, --config   Launch path configuration UI/CLI and exit
-  --cli, --headless       Force terminal-only prompts (no GUI dialogs)
-  --no-ssh-upgrade        Do not auto-convert GitHub HTTPS remotes to SSH
-  --ssh-upgrade           Explicitly enable GitHub HTTPS -> SSH conversion
-  -h, --help              Show this help message and exit
+  --configure, --config     Launch path configuration UI/CLI and exit
+  --cli, --headless         Force terminal-only prompts (no GUI dialogs)
+  --no-ssh-upgrade          Keep GitHub remotes/clones on HTTPS (no SSH conversion)
+  --ssh-upgrade             Explicitly enable GitHub HTTPS -> SSH conversion
+  --install-integrations    Create/update the macOS app or Linux launcher and exit
+  --uninstall-integrations  Remove the macOS app or Linux launcher and exit
+  -h, --help                Show this help message and exit
 
 Environment:
-  GH_MSYNC_NO_SSH_UPGRADE=1   Disable SSH auto-upgrade by default
+  GH_MSYNC_NO_SSH_UPGRADE=1                 Disable SSH auto-upgrade by default
+  GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 Skip automatic app/launcher setup
 EOF
 }
 
 RUN_CONFIGURE=0
+RUN_INSTALL_INTEGRATIONS=0
+RUN_UNINSTALL_INTEGRATIONS=0
 CONFIGURE_ARGS=()
 for arg in "$@"; do
     case "$arg" in
         --configure|--config)
             RUN_CONFIGURE=1
+            ;;
+        --install-integrations)
+            RUN_INSTALL_INTEGRATIONS=1
+            ;;
+        --uninstall-integrations)
+            RUN_UNINSTALL_INTEGRATIONS=1
             ;;
         --cli|--headless)
             CONFIGURE_ARGS+=("$arg")
@@ -94,16 +200,34 @@ for arg in "$@"; do
     esac
 done
 
+if [ "$RUN_INSTALL_INTEGRATIONS" -eq 1 ] && [ "$RUN_UNINSTALL_INTEGRATIONS" -eq 1 ]; then
+    echo "gh-msync: choose only one of --install-integrations or --uninstall-integrations." >&2
+    exit 2
+fi
+
+if [ "$RUN_INSTALL_INTEGRATIONS" -eq 1 ]; then
+    if run_system_integrations install --preferred-script "$0"; then
+        exit 0
+    fi
+    echo "gh-msync: system integration helper not found." >&2
+    exit 1
+fi
+
+if [ "$RUN_UNINSTALL_INTEGRATIONS" -eq 1 ]; then
+    if run_system_integrations uninstall; then
+        exit 0
+    fi
+    echo "gh-msync: system integration helper not found." >&2
+    exit 1
+fi
+
 if [ "$RUN_CONFIGURE" -eq 1 ]; then
-    CONFIGURER=""
-    SCRIPT_DIR="$(resolve_script_dir)"
-    if [ -x "$SCRIPT_DIR/configure-paths.sh" ]; then
-        CONFIGURER="$SCRIPT_DIR/configure-paths.sh"
-    elif command -v brew >/dev/null 2>&1; then
-        PREFIX="$(brew --prefix gh-msync 2>/dev/null)"
-        if [ -n "$PREFIX" ] && [ -x "$PREFIX/libexec/gh-msync-configure" ]; then
-            CONFIGURER="$PREFIX/libexec/gh-msync-configure"
-        fi
+    if [ -t 1 ]; then
+        run_system_integrations install --quiet --preferred-script "$0" >/dev/null 2>&1 || true
+    fi
+    CONFIGURER="$(resolve_support_script "configure-paths.sh" 2>/dev/null || true)"
+    if [ -z "$CONFIGURER" ]; then
+        CONFIGURER="$(resolve_support_script "gh-msync-configure" 2>/dev/null || true)"
     fi
     if [ -n "$CONFIGURER" ]; then
         exec "$CONFIGURER" "${CONFIGURE_ARGS[@]}"
@@ -149,6 +273,9 @@ for arg in "$@"; do
         --cli|--headless)
             FORCE_CLI=1
             ;;
+        --install-integrations|--uninstall-integrations)
+            # handled earlier
+            ;;
         --no-ssh-upgrade)
             AUTO_UPGRADE_SSH=0
             ;;
@@ -179,6 +306,8 @@ if [ "$SHOW_HELP" -eq 1 ]; then
     print_usage
     exit 0
 fi
+
+ensure_system_integrations
 
 if [ "$IS_TTY" -eq 1 ]; then
     printf '\033[2J\033[3J\033[H'
@@ -430,20 +559,14 @@ if command -v gh >/dev/null 2>&1; then
         if [[ ! "$clone_choice" =~ ^[Yy]$ ]]; then
             echo -e "    ${BLUE}No repositories cloned.${RESET}\n"
         else
-        # Construct an array of local remote URLs (normalized/lowercase)
-        local_urls=()
+        # Construct an array of local GitHub repo keys (owner/repo, lowercase)
+        local_repo_keys=()
         for repo_dir in "${repos[@]}"; do
             if [ -d "$repo_dir/.git" ]; then
                 url=$(cd "$repo_dir" && git remote get-url origin 2>/dev/null)
                 if [ -n "$url" ]; then
-                    # Standardize all remotes to git@github.com: format for consistent string matching
-                    url=$(echo "$url" | sed -e 's|https://github.com/|git@github.com:|' -e 's|ssh://git@github.com/|git@github.com:|')
-                    
-                    # Remove .git suffix and enforce lowercase
-                    url="${url%.git}"
-                    url=$(echo "$url" | tr '[:upper:]' '[:lower:]')
-                    
-                    local_urls+=("$url")
+                    repo_key=$(normalize_github_remote_key "$url" 2>/dev/null || true)
+                    [ -n "$repo_key" ] && local_repo_keys+=("$repo_key")
                 fi
             fi
         done
@@ -459,7 +582,7 @@ if command -v gh >/dev/null 2>&1; then
             GH_DISCOVERY_FAILED=1
             GH_DISCOVERY_REASON="tempfile"
         else
-            gh repo list --limit 1000 --json nameWithOwner,sshUrl --jq '.[] | "\(.nameWithOwner)|\(.sshUrl)"' > "$GH_REPO_LIST_FILE" 2>/dev/null &
+            gh repo list --limit 1000 --json nameWithOwner,sshUrl,url --jq '.[] | "\(.nameWithOwner)|\(.sshUrl)|\(.url)"' > "$GH_REPO_LIST_FILE" 2>/dev/null &
             gh_pid=$!
 
             spinner=( "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏" )
@@ -490,23 +613,27 @@ if command -v gh >/dev/null 2>&1; then
                 rm -f "$GH_REPO_LIST_FILE"
                 GH_REPO_LIST_FILE=""
 
-                while IFS="|" read -r name_with_owner ssh_url; do
+                while IFS="|" read -r name_with_owner ssh_url https_url; do
                     [ -z "$name_with_owner" ] && continue
 
-                    check_url="${ssh_url%.git}"
-                    check_url=$(echo "$check_url" | tr '[:upper:]' '[:lower:]')
+                    check_key=$(normalize_github_remote_key "$ssh_url" 2>/dev/null || normalize_github_remote_key "$https_url" 2>/dev/null || true)
+                    [ -n "$check_key" ] || continue
 
                     found=0
-                    for l_url in "${local_urls[@]}"; do
-                        if [ "$l_url" == "$check_url" ]; then
+                    for l_key in "${local_repo_keys[@]}"; do
+                        if [ "$l_key" == "$check_key" ]; then
                             found=1
                             break
                         fi
                     done
 
                     if [ $found -eq 0 ]; then
+                        clone_url="$ssh_url"
+                        if [ "$AUTO_UPGRADE_SSH" -eq 0 ] && [ -n "$https_url" ]; then
+                            clone_url="$https_url"
+                        fi
                         missing_repos+=("$name_with_owner")
-                        missing_urls+=("$ssh_url")
+                        missing_urls+=("$clone_url")
                     fi
                 done <<< "$remote_repos"
             fi

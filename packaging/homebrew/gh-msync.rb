@@ -14,16 +14,23 @@ class GhMsync < Formula
   def install
     bin.install "scripts/gh-msync" => "gh-msync"
     libexec.install "scripts/configure-paths.sh" => "gh-msync-configure"
+    libexec.install "scripts/system-integrations.sh"
     FileUtils.chmod 0755, libexec/"gh-msync-configure"
+    FileUtils.chmod 0755, libexec/"system-integrations.sh"
   end
 
   def post_install
     config_dir = File.expand_path("~/.config/gh-msync")
     config_file = File.join(config_dir, "config")
-    return if File.exist?(config_file)
+    unless File.exist?(config_file)
+      FileUtils.mkdir_p config_dir
+      File.write(config_file, "~/GitHub\n")
+    end
 
-    FileUtils.mkdir_p config_dir
-    File.write(config_file, "~/GitHub\n")
+    helper = libexec/"system-integrations.sh"
+    if helper.exist? && !quiet_system(helper, "install", "--quiet", "--preferred-script", bin/"gh-msync")
+      opoo "Could not install GitHub Multi-Sync launcher integrations automatically. Run `gh-msync --install-integrations` manually."
+    end
   end
 
   caveats <<~EOS
@@ -42,11 +49,14 @@ class GhMsync < Formula
       gh extension install sahilkamalny/gh-msync
       gh msync
 
-    Optional manual cleanup after `brew uninstall gh-msync`:
+    Removes Homebrew-managed files:
+      brew uninstall gh-msync
+
+    Also remove the shared macOS/Linux app launcher integrations (same across install methods):
+      gh-msync --uninstall-integrations
+
+    Optional full user-data cleanup after that:
       rm -rf ~/.config/gh-msync
-      rm -f ~/.local/bin/gh-msync
-      rm -rf "/Applications/GitHub Multi-Sync.app" "$HOME/Applications/GitHub Multi-Sync.app" "$HOME/Desktop/GitHub Multi-Sync.app"
-      rm -f "$HOME/.local/share/applications/gh-msync.desktop" "$HOME/Desktop/gh-msync.desktop"
       # If you previously added PATH manually, remove this line from your shell rc files:
       #   export PATH="$HOME/.local/bin:$PATH"
 

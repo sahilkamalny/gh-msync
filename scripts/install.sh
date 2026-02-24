@@ -89,10 +89,8 @@ echo ""
 
 if [ -f "$HOME/.local/bin/gh-msync" ]; then
     echo -e "    Configuration saved. Updating \033[1;36mGitHub Multi-Sync\033[0m..."
-    ACTION_STR="Updated"
 else
     echo -e "    Configuration saved. Installing \033[1;36mGitHub Multi-Sync\033[0m..."
-    ACTION_STR="Generated"
 fi
 echo ""
 print_box "❏  Target Repositories" "\033[1;34m" "\033[1;36m"
@@ -131,58 +129,12 @@ fi
 ln -sf "$SCRIPT_PATH" "$LOCAL_BIN/gh-msync"
 echo -e "    \033[1;32m∘\033[0m Installed command (\033[1mgh-msync\033[0m)"
 
-# 3. Handle OS-specific App Wrappers
-if [[ "$OS" == "Darwin" ]]; then
-    APP_NAME="GitHub Multi-Sync.app"
-    APP_DIR="$REPO_DIR/$APP_NAME"
-    APP_DIR_AS="$(escape_applescript_string "$APP_DIR")"
-    
-    rm -rf "$APP_DIR"
-    osacompile -o "$APP_DIR" -e "tell application \"Terminal\"" -e "activate" -e "do script \"exec bash \\\"$APP_DIR_AS/Contents/Resources/run.sh\\\"\"" -e "end tell" >/dev/null 2>&1
-    
-cat << EOF > "$APP_DIR/Contents/Resources/run.sh"
-#!/bin/bash
-export APP_GUI=1
-export SHELL_SESSIONS_DISABLE=1
-WIN_ID="\$(osascript -e 'tell application "Terminal" to get id of front window' 2>/dev/null || true)"
-"$REPO_DIR/scripts/gh-msync"
-
-read -r -p "Press [Enter] to exit..."
-
-if [ -n "\$WIN_ID" ]; then
-    osascript -e "tell application \"Terminal\" to set normal text color of (every window whose id is \$WIN_ID) to background color of (every window whose id is \$WIN_ID)" >/dev/null 2>&1 || true
-    nohup bash -c "sleep 0.1; osascript -e 'tell application \"Terminal\" to close (every window whose id is \$WIN_ID) saving no'" >/dev/null 2>&1 </dev/null &
-fi
-exec /bin/kill -9 \$PPID
-EOF
-    chmod +x "$APP_DIR/Contents/Resources/run.sh"
-    
-    if [ -f "/System/Applications/Utilities/Terminal.app/Contents/Resources/Terminal.icns" ]; then
-        cp "/System/Applications/Utilities/Terminal.app/Contents/Resources/Terminal.icns" "$APP_DIR/Contents/Resources/applet.icns"
-        touch "$APP_DIR"
-    fi
-    echo -e "    \033[1;32m∘\033[0m ${ACTION_STR} macOS App (\033[1;4;37mGitHub Multi-Sync.app\033[0m)"
-
-elif [[ "$OS" == "Linux" ]]; then
-    DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
-    mkdir -p "$DESKTOP_ENTRY_DIR"
-    DESKTOP_FILE="$DESKTOP_ENTRY_DIR/gh-msync.desktop"
-    
-    cat > "$DESKTOP_FILE" <<EOF
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=GitHub Multi-Sync
-Comment=Synchronize all local GitHub repositories
-Exec="$SCRIPT_PATH"
-Icon=utilities-terminal
-Terminal=true
-Categories=Utility;Development;
-Keywords=git;github;sync;repository;
-EOF
-
-    chmod +x "$DESKTOP_FILE"
-    echo -e "    \033[1;32m∘\033[0m ${ACTION_STR} Linux Application (\033[4mgh-msync.desktop\033[0m)"
+# 3. Install unified desktop integrations (macOS app / Linux launcher)
+INTEGRATIONS_HELPER="$REPO_DIR/scripts/system-integrations.sh"
+if [ -x "$INTEGRATIONS_HELPER" ]; then
+    "$INTEGRATIONS_HELPER" install --preferred-script "$SCRIPT_PATH"
+else
+    echo -e "    \033[1;33m△\033[0m Could not install desktop integrations (missing \033[4msystem-integrations.sh\033[0m)"
 fi
 
 SHELL_RC=""
@@ -221,7 +173,7 @@ print_box "✓  Installation Complete!" "\033[1;34m" "\033[1;32m"
 echo ""
 echo -e "    You can now run \033[1;36mgh-msync\033[0m in your terminal,"
 if [[ "$OS" == "Darwin" ]]; then
-    echo -e "    or double-click \033[1;4;36mGitHub Multi-Sync.app\033[0m in this folder,"
+    echo -e "    or launch \033[1;4;36mGitHub Multi-Sync.app\033[0m from \033[4m~/Applications\033[0m,"
     echo -e "    or find it via Spotlight Search / Launchpad."
 elif [[ "$OS" == "Linux" ]]; then
     echo -e "    or launch \033[1mGitHub Multi-Sync\033[0m from your application menu."

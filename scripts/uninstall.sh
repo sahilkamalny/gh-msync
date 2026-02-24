@@ -9,6 +9,7 @@ printf '\033[2J\033[3J\033[H'
 # Detect OS
 OS="$(uname -s)"
 SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+INTEGRATIONS_HELPER="$SCRIPT_ROOT/scripts/system-integrations.sh"
 
 string_display_width() {
     local text="$1"
@@ -165,66 +166,17 @@ if grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.profile" 2>/dev/null; 
     fi
 fi
 
+# Remove desktop integrations (shared helper)
+if [ -x "$INTEGRATIONS_HELPER" ]; then
+    "$INTEGRATIONS_HELPER" uninstall --legacy-repo-dir "$SCRIPT_ROOT"
+fi
+
 # Remove Configuration
 if [ -d "$HOME/.config/gh-msync" ]; then
     if rm -rf "$HOME/.config/gh-msync"; then
         echo -e "    \033[1;31m∘\033[0m Removed configurations (\033[4m~/.config/gh-msync\033[0m)"
     else
         echo -e "    \033[1;33m△\033[0m Could not remove (\033[4m~/.config/gh-msync\033[0m)"
-    fi
-fi
-
-# Remove Linux desktop entry
-if [ -f "$HOME/.local/share/applications/gh-msync.desktop" ]; then
-    if rm -f "$HOME/.local/share/applications/gh-msync.desktop"; then
-        echo -e "    \033[1;31m∘\033[0m Removed Linux App entry (\033[4mgh-msync.desktop\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not remove (\033[4mgh-msync.desktop\033[0m)"
-    fi
-fi
-
-# Remove Mac App if exists in repo dir
-if [ -d "$SCRIPT_ROOT/GitHub Multi-Sync.app" ]; then
-    if rm -rf "$SCRIPT_ROOT/GitHub Multi-Sync.app"; then
-        echo -e "    \033[1;31m∘\033[0m Removed macOS App (\033[4mGitHub Multi-Sync.app\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not remove (\033[4mGitHub Multi-Sync.app\033[0m)"
-    fi
-fi
-
-# Remove Mac App if user dragged it to system /Applications
-if [ -d "/Applications/GitHub Multi-Sync.app" ]; then
-    if rm -rf "/Applications/GitHub Multi-Sync.app" >/dev/null 2>&1; then
-        echo -e "    \033[1;31m∘\033[0m Removed macOS App from system (\033[4m/Applications\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not remove app from (\033[4m/Applications\033[0m) without elevated permissions"
-    fi
-fi
-
-# Remove Mac App if user dragged it to user ~/Applications
-if [ -d "$HOME/Applications/GitHub Multi-Sync.app" ]; then
-    if rm -rf "$HOME/Applications/GitHub Multi-Sync.app"; then
-        echo -e "    \033[1;31m∘\033[0m Removed macOS App from user (\033[4m~/Applications\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not remove app from (\033[4m~/Applications\033[0m)"
-    fi
-fi
-
-# Remove Mac App if user dragged it to their Desktop
-if [ -d "$HOME/Desktop/GitHub Multi-Sync.app" ]; then
-    if rm -rf "$HOME/Desktop/GitHub Multi-Sync.app"; then
-        echo -e "    \033[1;31m∘\033[0m Removed macOS App from (\033[4m~/Desktop\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not remove app from (\033[4m~/Desktop\033[0m)"
-    fi
-fi
-
-# Remove Linux desktop entry if user dragged it to their Desktop
-if [ -f "$HOME/Desktop/gh-msync.desktop" ]; then
-    if rm -f "$HOME/Desktop/gh-msync.desktop"; then
-        echo -e "    \033[1;31m∘\033[0m Removed Linux App entry from (\033[4m~/Desktop\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not remove Linux app entry from (\033[4m~/Desktop\033[0m)"
     fi
 fi
 
