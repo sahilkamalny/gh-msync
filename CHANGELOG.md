@@ -34,6 +34,7 @@ All notable changes to `gh-msync` will be documented in this file.
 
 ### Fixed
 
+- Faster startup screen clears in macOS/Linux wrapper entrypoints and the macOS app runner to reduce visible Terminal startup noise before the app/installer UI renders.
 - Launcher fallback semantics now preserve real runtime errors and only fall through on invocation failures.
 - No-SSH mode now uses HTTPS clone URLs for missing repositories.
 - macOS app Enter-to-close behavior and Terminal window close flow.

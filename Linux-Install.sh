@@ -1,4 +1,9 @@
 #!/bin/bash
+
+if [ -t 1 ]; then
+    printf '\033[2J\033[3J\033[H'
+fi
+
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Some Linux file managers launch .sh files without a visible terminal.
@@ -71,6 +76,9 @@ run_in_terminal() {
     launcher="$(mktemp "${TMPDIR:-/tmp}/gh-msync-install.XXXXXX")"
     cat >"$launcher" <<EOF
 #!/bin/bash
+if [ -t 1 ]; then
+    printf '\033[2J\033[3J\033[H'
+fi
 $script_cmd
 read -r -p 'Press [Enter] to close...'
 rm -f -- "$launcher"

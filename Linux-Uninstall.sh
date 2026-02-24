@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -t 1 ]; then
+    printf '\033[2J\033[3J\033[H'
+fi
+
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 guake_is_running() {
@@ -70,6 +74,9 @@ run_in_terminal() {
     launcher="$(mktemp "${TMPDIR:-/tmp}/gh-msync-uninstall.XXXXXX")"
     cat >"$launcher" <<EOF
 #!/bin/bash
+if [ -t 1 ]; then
+    printf '\033[2J\033[3J\033[H'
+fi
 $script_cmd
 read -r -p 'Press [Enter] to close...'
 rm -f -- "$launcher"

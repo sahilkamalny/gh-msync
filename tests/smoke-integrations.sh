@@ -111,6 +111,9 @@ if [ "$OS" = "Darwin" ]; then
         'tell application "Terminal" to close front window saving no'
     assert_contains \
         "$HOME1/Applications/GitHub Multi-Sync.app/Contents/Resources/run.sh" \
+        "printf '\\033[2J\\033[3J\\033[H'"
+    assert_contains \
+        "$HOME1/Applications/GitHub Multi-Sync.app/Contents/Resources/run.sh" \
         'nohup osascript'
     assert_contains \
         "$HOME1/Applications/GitHub Multi-Sync.app/Contents/Resources/run.sh" \

@@ -1,6 +1,10 @@
 #!/bin/bash
 export SHELL_SESSIONS_DISABLE=1
 
+if [ -t 1 ]; then
+    printf '\033[2J\033[3J\033[H'
+fi
+
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 "$DIR/scripts/uninstall.sh"
 

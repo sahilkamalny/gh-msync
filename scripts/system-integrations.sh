@@ -174,6 +174,9 @@ install_macos_app() {
 #!/bin/bash
 export APP_GUI=1
 export SHELL_SESSIONS_DISABLE=1
+if [ -t 1 ]; then
+    printf '\033[2J\033[3J\033[H'
+fi
 "$launcher_as"
 
 read -r -p "Press [Enter] to exit..."
