@@ -40,8 +40,8 @@ if [ -f "$CONFIG_FILE" ]; then
 fi
 
 # Define Colors
-CYAN="\033[1;36m"
 RESET="\033[0m"
+PATH_EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""
 
 trim_whitespace() {
     local value="$1"
@@ -153,7 +153,7 @@ fi
 PATH_INJECTED=0
 if [[ ":$PATH:" == *":$LOCAL_BIN:"* ]]; then
     PATH_INJECTED=1
-elif [ -n "$SHELL_RC" ] && [ -f "$SHELL_RC" ] && grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$SHELL_RC" 2>/dev/null; then
+elif [ -n "$SHELL_RC" ] && [ -f "$SHELL_RC" ] && grep -qF "$PATH_EXPORT_LINE" "$SHELL_RC" 2>/dev/null; then
     PATH_INJECTED=1
 fi
 

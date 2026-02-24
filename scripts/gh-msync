@@ -86,7 +86,7 @@ expand_home_path() {
         "~")
             printf '%s' "$HOME"
             ;;
-        "~/"*)
+        ~/*)
             printf '%s/%s' "$HOME" "${1#~/}"
             ;;
         *)
@@ -406,11 +406,11 @@ trap cleanup_temp_files EXIT
 
 count=0
 for repo in "${repos[@]}"; do
-    repo_paths[$count]="$repo"
-    ssh_upgraded[$count]=0
+    repo_paths[count]="$repo"
+    ssh_upgraded[count]=0
     
     cd "$repo" || {
-        statuses[$count]=2
+        statuses[count]=2
         ((count++))
         continue
     }
@@ -418,13 +418,13 @@ for repo in "${repos[@]}"; do
     # Detect uncommitted changes
     modified_files=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
     if [[ ! "$modified_files" =~ ^[0-9]+$ ]]; then
-        statuses[$count]=2
+        statuses[count]=2
         ((count++))
         continue
     fi
 
     if [ "$modified_files" -gt 0 ]; then
-        statuses[$count]=1
+        statuses[count]=1
         ((count++))
         continue
     fi
@@ -433,26 +433,26 @@ for repo in "${repos[@]}"; do
     if [ "$AUTO_UPGRADE_SSH" -eq 1 ]; then
         current_url=$(git remote get-url origin 2>/dev/null)
         if [[ "$current_url" == https://github.com/* ]]; then
-            ssh_url=$(echo "$current_url" | sed 's|https://github.com/|git@github.com:|')
+            ssh_url="${current_url/#https:\/\/github.com\//git@github.com:}"
             if git remote set-url origin "$ssh_url" >/dev/null 2>&1; then
-                ssh_upgraded[$count]=1
+                ssh_upgraded[count]=1
             fi
         fi
     fi
 
-    statuses[$count]=0
-    before_commits[$count]=$(git rev-parse HEAD 2>/dev/null)
+    statuses[count]=0
+    before_commits[count]=$(git rev-parse HEAD 2>/dev/null)
     
     tmp=$(mktemp 2>/dev/null || true)
     if [ -z "$tmp" ]; then
-        statuses[$count]=2
+        statuses[count]=2
         ((count++))
         continue
     fi
-    tmp_files[$count]="$tmp"
+    tmp_files[count]="$tmp"
     
     git pull --rebase >"$tmp" 2>&1 &
-    pids[$count]=$!
+    pids[count]=$!
     
     ((count++))
 done
@@ -551,7 +551,7 @@ if command -v gh >/dev/null 2>&1; then
         clone_choice="n"
         if [ -t 0 ]; then
             print_box "❏  Missing Repositories" "$BLUE" "$CYAN"
-            printf "\n    ${CYAN}Would you like to clone missing remote repositories? (y/n): ${RESET}"
+            printf '\n    %bWould you like to clone missing remote repositories? (y/n): %b' "$CYAN" "$RESET"
             read -r clone_choice
             echo ""
         fi

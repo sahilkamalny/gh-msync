@@ -56,6 +56,8 @@ fi
 # Define Colors
 CYAN="\033[1;36m"
 RESET="\033[0m"
+PATH_EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""
+PATH_EXPORT_SED_EXPR="/export PATH=\"\\\$HOME\\/.local\\/bin:\\\$PATH\"/d"
 
 FORCE_CLI=0
 for arg in "$@"; do
@@ -95,8 +97,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
 elif [[ "$OS" == "Linux" ]]; then
     if command -v zenity >/dev/null; then
         echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
-        zenity --question --title="GitHub Multi-Sync Uninstaller" --text="Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --ok-label="Uninstall" --cancel-label="Cancel" --icon-name=dialog-warning 2>/dev/null
-        if [ $? -ne 0 ]; then
+        if ! zenity --question --title="GitHub Multi-Sync Uninstaller" --text="Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --ok-label="Uninstall" --cancel-label="Cancel" --icon-name=dialog-warning 2>/dev/null; then
             echo -e "\r\033[K    \033[1;33mUninstallation cancelled.\033[0m"
             echo -e "\n\n    ©  2026 Sahil Kamal\n"
             exit 0
@@ -104,8 +105,7 @@ elif [[ "$OS" == "Linux" ]]; then
         echo -ne "\r\033[K"
     elif command -v kdialog >/dev/null; then
         echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
-        kdialog --warningcontinuecancel "Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --title "GitHub Multi-Sync Uninstaller" --continue-label "Uninstall" 2>/dev/null
-        if [ $? -ne 0 ]; then
+        if ! kdialog --warningcontinuecancel "Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --title "GitHub Multi-Sync Uninstaller" --continue-label "Uninstall" 2>/dev/null; then
             echo -e "\r\033[K    \033[1;33mUninstallation cancelled.\033[0m"
             echo -e "\n\n    ©  2026 Sahil Kamal\n"
             exit 0
@@ -118,7 +118,7 @@ elif [[ "$OS" == "Linux" ]]; then
 fi
 
 if [ "$HAS_GUI" -eq 0 ]; then
-    printf "    ${CYAN}Are you sure you want to uninstall GitHub Multi-Sync? (y/n): ${RESET}"
+    printf '    %bAre you sure you want to uninstall GitHub Multi-Sync? (y/n): %b' "$CYAN" "$RESET"
     read -r confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "\n    \033[1;33mUninstallation cancelled.\033[0m"
@@ -137,34 +137,25 @@ if [ -L "$HOME/.local/bin/gh-msync" ] || [ -f "$HOME/.local/bin/gh-msync" ]; the
     fi
 fi
 
-if grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.zshrc" 2>/dev/null; then
-    if sed -i '' '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.zshrc" 2>/dev/null || sed -i '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.zshrc" 2>/dev/null; then
-        echo -e "    \033[1;31m∘\033[0m Removed PATH injection (\033[4m~/.zshrc\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not update (\033[4m~/.zshrc\033[0m)"
+remove_path_injection_from_rc() {
+    local rc_path="$1"
+    local rc_label="$2"
+
+    if ! grep -qF "$PATH_EXPORT_LINE" "$rc_path" 2>/dev/null; then
+        return 0
     fi
-fi
-if grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.bash_profile" 2>/dev/null; then
-    if sed -i '' '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.bash_profile" 2>/dev/null || sed -i '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.bash_profile" 2>/dev/null; then
-        echo -e "    \033[1;31m∘\033[0m Removed PATH injection (\033[4m~/.bash_profile\033[0m)"
+
+    if sed -i '' "$PATH_EXPORT_SED_EXPR" "$rc_path" 2>/dev/null || sed -i "$PATH_EXPORT_SED_EXPR" "$rc_path" 2>/dev/null; then
+        echo -e "    \033[1;31m∘\033[0m Removed PATH injection (\033[4m$rc_label\033[0m)"
     else
-        echo -e "    \033[1;33m△\033[0m Could not update (\033[4m~/.bash_profile\033[0m)"
+        echo -e "    \033[1;33m△\033[0m Could not update (\033[4m$rc_label\033[0m)"
     fi
-fi
-if grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.bashrc" 2>/dev/null; then
-    if sed -i '' '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.bashrc" 2>/dev/null || sed -i '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.bashrc" 2>/dev/null; then
-        echo -e "    \033[1;31m∘\033[0m Removed PATH injection (\033[4m~/.bashrc\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not update (\033[4m~/.bashrc\033[0m)"
-    fi
-fi
-if grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.profile" 2>/dev/null; then
-    if sed -i '' '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.profile" 2>/dev/null || sed -i '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.profile" 2>/dev/null; then
-        echo -e "    \033[1;31m∘\033[0m Removed PATH injection (\033[4m~/.profile\033[0m)"
-    else
-        echo -e "    \033[1;33m△\033[0m Could not update (\033[4m~/.profile\033[0m)"
-    fi
-fi
+}
+
+remove_path_injection_from_rc "$HOME/.zshrc" "$HOME/.zshrc"
+remove_path_injection_from_rc "$HOME/.bash_profile" "$HOME/.bash_profile"
+remove_path_injection_from_rc "$HOME/.bashrc" "$HOME/.bashrc"
+remove_path_injection_from_rc "$HOME/.profile" "$HOME/.profile"
 
 # Remove desktop integrations (shared helper)
 if [ -x "$INTEGRATIONS_HELPER" ]; then

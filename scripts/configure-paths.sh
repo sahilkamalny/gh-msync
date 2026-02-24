@@ -260,11 +260,11 @@ fi
 
 if [ "$HAS_GUI" -eq 0 ]; then
     if [ -n "$USER_PATHS" ]; then
-        printf "    ${CYAN}Enter comma-separated repository root paths: ${RESET}"
+        printf '    %bEnter comma-separated repository root paths: %b' "$CYAN" "$RESET"
         read -r input_paths
         [ -n "$input_paths" ] && USER_PATHS="$input_paths"
     else
-        printf "    ${CYAN}Enter comma-separated repository root paths (e.g. ~/GitHub, ~/Projects): ${RESET}"
+        printf '    %bEnter comma-separated repository root paths (e.g. ~/GitHub, ~/Projects): %b' "$CYAN" "$RESET"
         read -r USER_PATHS
     fi
     echo ""
@@ -272,7 +272,7 @@ fi
 
 # Write config
 if [ -n "$USER_PATHS" ]; then
-    > "$CONFIG_FILE"
+    : > "$CONFIG_FILE"
     IFS=',' read -ra PATH_ARRAY <<< "$USER_PATHS"
     valid_paths=0
     for p in "${PATH_ARRAY[@]}"; do
@@ -287,7 +287,7 @@ if [ -n "$USER_PATHS" ]; then
         USER_PATHS=""
     fi
 else
-    > "$CONFIG_FILE"
+    : > "$CONFIG_FILE"
     echo "$HOME/GitHub" >> "$CONFIG_FILE"
 fi
 
