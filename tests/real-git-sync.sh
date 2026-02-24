@@ -55,10 +55,10 @@ git_commit_file "$work_dir/beta-behind-seed" updates.txt "new change" "remote up
 git -C "$work_dir/beta-behind-seed" push >/dev/null 2>&1
 
 # Create local uncommitted changes for gamma-modified.
-printf 'local edits\n' >> "$base_dir/gamma-modified/README.md"
+printf 'local edits\n' >>"$base_dir/gamma-modified/README.md"
 
 # Prevent missing-repository interactive prompts by simulating unauthenticated gh.
-cat > "$stub_dir/gh" <<'EOF_GH'
+cat >"$stub_dir/gh" <<'EOF_GH'
 #!/bin/bash
 set -euo pipefail
 if [ "${1:-}" = "auth" ] && [ "${2:-}" = "status" ]; then
@@ -70,9 +70,9 @@ chmod +x "$stub_dir/gh"
 
 set +e
 HOME="$TMP_ROOT/home" \
-PATH="$stub_dir:$BASE_PATH" \
-GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
-scripts/gh-msync --headless "$base_dir" >"$out" 2>&1
+    PATH="$stub_dir:$BASE_PATH" \
+    GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
+    scripts/gh-msync --headless "$base_dir" >"$out" 2>&1
 status=$?
 set -e
 

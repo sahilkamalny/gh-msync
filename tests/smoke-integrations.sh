@@ -46,7 +46,7 @@ assert_contains() {
 
 make_osacompile_stub() {
     local dir="$1"
-    cat > "$dir/osacompile" <<'EOS'
+    cat >"$dir/osacompile" <<'EOS'
 #!/bin/bash
 out=""
 while [ $# -gt 0 ]; do
@@ -86,19 +86,19 @@ HOME2="$TMP_ROOT/home2"
 STUB2="$TMP_ROOT/stub2"
 LOG2="$TMP_ROOT/order.log"
 mkdir -p "$HOME2" "$STUB2"
-: > "$LOG2"
+: >"$LOG2"
 make_osacompile_stub "$STUB2"
-cat > "$STUB2/preferred" <<EOS
+cat >"$STUB2/preferred" <<EOS
 #!/bin/bash
 echo preferred:\"\$*\" >> "$LOG2"
 exit 127
 EOS
-cat > "$STUB2/gh-msync" <<EOS
+cat >"$STUB2/gh-msync" <<EOS
 #!/bin/bash
 echo gh-msync:\"\$*\" >> "$LOG2"
 exit 127
 EOS
-cat > "$STUB2/gh" <<EOS
+cat >"$STUB2/gh" <<EOS
 #!/bin/bash
 echo gh:\"\$*\" >> "$LOG2"
 [ "\${1:-}" = "msync" ] && exit 0
@@ -120,19 +120,19 @@ HOME3="$TMP_ROOT/home3"
 STUB3="$TMP_ROOT/stub3"
 LOG3="$TMP_ROOT/preferred-success.log"
 mkdir -p "$HOME3" "$STUB3"
-: > "$LOG3"
+: >"$LOG3"
 make_osacompile_stub "$STUB3"
-cat > "$STUB3/preferred" <<EOS
+cat >"$STUB3/preferred" <<EOS
 #!/bin/bash
 echo preferred-ok:\"\$*\" >> "$LOG3"
 exit 0
 EOS
-cat > "$STUB3/gh-msync" <<EOS
+cat >"$STUB3/gh-msync" <<EOS
 #!/bin/bash
 echo gh-msync-should-not-run >> "$LOG3"
 exit 0
 EOS
-cat > "$STUB3/gh" <<EOS
+cat >"$STUB3/gh" <<EOS
 #!/bin/bash
 echo gh-should-not-run >> "$LOG3"
 exit 0
@@ -152,14 +152,14 @@ HOME4="$TMP_ROOT/home4"
 STUB4="$TMP_ROOT/stub4"
 LOG4="$TMP_ROOT/runtime-error.log"
 mkdir -p "$HOME4" "$STUB4"
-: > "$LOG4"
+: >"$LOG4"
 make_osacompile_stub "$STUB4"
-cat > "$STUB4/gh-msync" <<EOS
+cat >"$STUB4/gh-msync" <<EOS
 #!/bin/bash
 echo gh-msync-runtime:\"\$*\" >> "$LOG4"
 exit 42
 EOS
-cat > "$STUB4/gh" <<EOS
+cat >"$STUB4/gh" <<EOS
 #!/bin/bash
 echo gh-should-not-run >> "$LOG4"
 exit 0
@@ -183,9 +183,9 @@ HOME5="$TMP_ROOT/home5"
 STUB5="$TMP_ROOT/stub5"
 RMLOG5="$TMP_ROOT/rm.log"
 mkdir -p "$HOME5" "$STUB5"
-: > "$RMLOG5"
+: >"$RMLOG5"
 make_osacompile_stub "$STUB5"
-cat > "$STUB5/rm" <<EOS
+cat >"$STUB5/rm" <<EOS
 #!/bin/bash
 echo rm:\"\$*\" >> "$RMLOG5"
 exit 0

@@ -55,10 +55,9 @@ jobs:
         uses: crate-ci/typos@v1
 
   lint-shell-format:
-    name: Lint (Shell Formatting, shfmt advisory)
+    name: Lint (Shell Formatting)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true
 
     steps:
       - name: Checkout
@@ -69,7 +68,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y shfmt
 
-      - name: Check shell formatting (advisory)
+      - name: Check shell formatting
         shell: bash
         run: |
           set -euo pipefail

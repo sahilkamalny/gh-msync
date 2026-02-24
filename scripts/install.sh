@@ -77,7 +77,7 @@ print_box() {
     local horizontal
 
     title_width="$(string_display_width "$title")"
-    inner_width=$(( title_width + 3 ))
+    inner_width=$((title_width + 3))
     horizontal="$(printf '%*s' "$inner_width" '' | tr ' ' '━')"
     echo -e "${border_color}┏${horizontal}┓${RESET}"
     echo -e "${border_color}┃${RESET} ${title_color}${title}${RESET}  ${border_color}┃${RESET}"
@@ -97,7 +97,7 @@ print_box "❏  Target Repositories" "\033[1;34m" "\033[1;36m"
 echo ""
 
 if [ -n "$USER_PATHS" ]; then
-    IFS=',' read -ra PATH_ARRAY <<< "$USER_PATHS"
+    IFS=',' read -ra PATH_ARRAY <<<"$USER_PATHS"
     for p in "${PATH_ARRAY[@]}"; do
         p="$(trim_whitespace "$p")"
         [ -n "$p" ] && echo -e "    \033[1;34m∘\033[0m $p"
@@ -159,7 +159,7 @@ fi
 
 if [ "$PATH_INJECTED" -eq 0 ]; then
     if [ -n "$SHELL_RC" ]; then
-        echo -e "\nexport PATH=\"\$HOME/.local/bin:\$PATH\"" >> "$SHELL_RC"
+        echo -e "\nexport PATH=\"\$HOME/.local/bin:\$PATH\"" >>"$SHELL_RC"
         echo -e "    \033[1;32m∘\033[0m Configured PATH automatically via \033[4m$(basename "$SHELL_RC")\033[0m"
         echo -e "      \033[3m(Please restart your terminal or run 'source $SHELL_RC' to apply)\033[0m"
     fi

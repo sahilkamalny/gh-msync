@@ -44,7 +44,7 @@ scenario_configure_paths_cli() {
 
     home3="$TMP_ROOT/config-home-3"
     mkdir -p "$home3/.config/gh-msync"
-    printf '/tmp/one\n/tmp/two\n' > "$home3/.config/gh-msync/config"
+    printf '/tmp/one\n/tmp/two\n' >"$home3/.config/gh-msync/config"
     printf '\n' | HOME="$home3" scripts/configure-paths.sh --cli --quiet >/dev/null
     cfg="$home3/.config/gh-msync/config"
     actual="$(cat "$cfg")"$'\n'
@@ -70,13 +70,13 @@ scenario_install_uninstall_lifecycle() {
     cp "$REPO_DIR/scripts/install.sh" "$repo_copy/scripts/install.sh"
     cp "$REPO_DIR/scripts/uninstall.sh" "$repo_copy/scripts/uninstall.sh"
 
-    cat > "$repo_copy/scripts/gh-msync" <<'EOF_CORE'
+    cat >"$repo_copy/scripts/gh-msync" <<'EOF_CORE'
 #!/bin/bash
 exit 0
 EOF_CORE
     chmod +x "$repo_copy/scripts/gh-msync"
 
-    cat > "$repo_copy/scripts/configure-paths.sh" <<EOF_CFG
+    cat >"$repo_copy/scripts/configure-paths.sh" <<EOF_CFG
 #!/bin/bash
 set -euo pipefail
 mkdir -p "\$HOME/.config/gh-msync"
@@ -86,7 +86,7 @@ exit 0
 EOF_CFG
     chmod +x "$repo_copy/scripts/configure-paths.sh"
 
-    cat > "$repo_copy/scripts/system-integrations.sh" <<EOF_INT
+    cat >"$repo_copy/scripts/system-integrations.sh" <<EOF_INT
 #!/bin/bash
 set -euo pipefail
 printf '%s\n' "\$*" >> "$integrations_log"
@@ -103,11 +103,11 @@ EOF_INT
     chmod +x "$repo_copy/scripts/system-integrations.sh"
 
     # Prevent real notifications/popups during lifecycle tests.
-    cat > "$stub_bin/osascript" <<'EOF_OSA'
+    cat >"$stub_bin/osascript" <<'EOF_OSA'
 #!/bin/bash
 exit 0
 EOF_OSA
-    cat > "$stub_bin/notify-send" <<'EOF_NOTIFY'
+    cat >"$stub_bin/notify-send" <<'EOF_NOTIFY'
 #!/bin/bash
 exit 0
 EOF_NOTIFY
@@ -171,12 +171,12 @@ scenario_linux_wrapper_fallback_dispatch() {
     cp "$REPO_DIR/Linux-Install.sh" "$app_dir/Linux-Install.sh"
     cp "$REPO_DIR/Linux-Uninstall.sh" "$app_dir/Linux-Uninstall.sh"
 
-    cat > "$app_dir/scripts/install.sh" <<EOF_INST
+    cat >"$app_dir/scripts/install.sh" <<EOF_INST
 #!/bin/bash
 printf '%s\n' "\$*" >> "$install_log"
 exit 0
 EOF_INST
-    cat > "$app_dir/scripts/uninstall.sh" <<EOF_UNINST
+    cat >"$app_dir/scripts/uninstall.sh" <<EOF_UNINST
 #!/bin/bash
 printf '%s\n' "\$*" >> "$uninstall_log"
 exit 0
@@ -185,7 +185,7 @@ EOF_UNINST
 
     # Ensure no terminal launcher is detected so wrapper uses direct fallback.
     set +e
-    PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Install.sh" --cli --headless > /dev/null 2>&1
+    PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Install.sh" --cli --headless >/dev/null 2>&1
     local status=$?
     set -e
     assert_status "$status" 0
@@ -193,7 +193,7 @@ EOF_UNINST
     pass "Linux-Install.sh falls back to direct scripts/install.sh when no terminal app is available"
 
     set +e
-    PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Uninstall.sh" --cli > /dev/null 2>&1
+    PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Uninstall.sh" --cli >/dev/null 2>&1
     status=$?
     set -e
     assert_status "$status" 0
@@ -208,16 +208,15 @@ scenario_linux_wrapper_terminal_dispatch_matrix() {
     install_log="$TMP_ROOT/linux-wrapper-terminal-matrix-install.log"
     uninstall_log="$TMP_ROOT/linux-wrapper-terminal-matrix-uninstall.log"
     mkdir -p "$app_dir/scripts"
-
     cp "$REPO_DIR/Linux-Install.sh" "$app_dir/Linux-Install.sh"
     cp "$REPO_DIR/Linux-Uninstall.sh" "$app_dir/Linux-Uninstall.sh"
 
-    cat > "$app_dir/scripts/install.sh" <<EOF_INST
+    cat >"$app_dir/scripts/install.sh" <<EOF_INST
 #!/bin/bash
 printf '%s\n' "\$*" >> "$install_log"
 exit 0
 EOF_INST
-    cat > "$app_dir/scripts/uninstall.sh" <<EOF_UNINST
+    cat >"$app_dir/scripts/uninstall.sh" <<EOF_UNINST
 #!/bin/bash
 printf '%s\n' "\$*" >> "$uninstall_log"
 exit 0
@@ -228,12 +227,23 @@ EOF_UNINST
         local dir="$1"
         local terminal_name="$2"
         local log_file="$3"
-        cat > "$dir/$terminal_name" <<EOF_TERM
+        cat >"$dir/$terminal_name" <<EOF_TERM
 #!/bin/bash
 printf '%s:%s\n' "$terminal_name" "\$*" >> "$log_file"
 exit 0
 EOF_TERM
         chmod +x "$dir/$terminal_name"
+    }
+
+    populate_wrapper_tool_stubs() {
+        local dir="$1"
+        local cmd real_path
+
+        for cmd in dirname mktemp cat chmod rm; do
+            real_path="$(command -v "$cmd")"
+            [ -n "$real_path" ] || fail "required test helper command not found: $cmd"
+            ln -sf "$real_path" "$dir/$cmd"
+        done
     }
 
     run_terminal_case() {
@@ -246,21 +256,23 @@ EOF_TERM
 
         rm -rf "$stub_dir"
         mkdir -p "$stub_dir"
-        : > "$terminal_log"
+        : >"$terminal_log"
         rm -f "$install_log" "$uninstall_log"
 
+        populate_wrapper_tool_stubs "$stub_dir"
         make_terminal_stub "$stub_dir" "$terminal_name" "$terminal_log"
 
         set +e
-        PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Install.sh" --cli > /dev/null 2>&1
+        PATH="$stub_dir" /bin/bash "$app_dir/Linux-Install.sh" --cli >/dev/null 2>&1
         status=$?
         set -e
         assert_status "$status" 0
         assert_file_contains "$terminal_log" "$expected_fragment"
         assert_not_exists "$install_log"
 
+        : >"$terminal_log"
         set +e
-        PATH="$stub_dir:$BASE_PATH" bash "$app_dir/Linux-Uninstall.sh" --cli > /dev/null 2>&1
+        PATH="$stub_dir" /bin/bash "$app_dir/Linux-Uninstall.sh" --cli >/dev/null 2>&1
         status=$?
         set -e
         assert_status "$status" 0
@@ -269,14 +281,15 @@ EOF_TERM
     }
 
     run_terminal_case "kgx" "kgx:-- bash "
+    run_terminal_case "gnome-terminal" "gnome-terminal:-- bash "
     run_terminal_case "xfce4-terminal" "xfce4-terminal:--command bash "
     run_terminal_case "mate-terminal" "mate-terminal:-e bash "
     run_terminal_case "alacritty" "alacritty:-e bash "
     run_terminal_case "kitty" "kitty:bash "
     run_terminal_case "wezterm" "wezterm:start -- bash "
-    run_terminal_case "footclient" "footclient:-e bash "
     run_terminal_case "foot" "foot:-e bash "
-    run_terminal_case "x-terminal-emulator" "x-terminal-emulator:-e bash "
+    run_terminal_case "footclient" "footclient:-e bash "
+    run_terminal_case "x-terminal-emulator" "x-terminal-emulator:-e /"
     pass "Linux wrappers dispatch to expanded terminal launcher set without falling back"
 
     # Ensure detection order prefers modern GNOME Console (kgx) before gnome-terminal.
@@ -285,14 +298,15 @@ EOF_TERM
     order_log="$TMP_ROOT/linux-wrapper-order.log"
     rm -rf "$order_stub_dir"
     mkdir -p "$order_stub_dir"
-    : > "$order_log"
+    : >"$order_log"
     rm -f "$install_log"
 
+    populate_wrapper_tool_stubs "$order_stub_dir"
     make_terminal_stub "$order_stub_dir" "kgx" "$order_log"
     make_terminal_stub "$order_stub_dir" "gnome-terminal" "$order_log"
 
     set +e
-    PATH="$order_stub_dir:$BASE_PATH" bash "$app_dir/Linux-Install.sh" --cli > /dev/null 2>&1
+    PATH="$order_stub_dir" /bin/bash "$app_dir/Linux-Install.sh" --cli >/dev/null 2>&1
     status=$?
     set -e
     assert_status "$status" 0
@@ -300,6 +314,18 @@ EOF_TERM
     assert_file_not_contains "$order_log" "gnome-terminal:"
     assert_not_exists "$install_log"
     pass "Linux wrapper terminal detection prefers kgx before gnome-terminal"
+
+    : >"$order_log"
+    rm -f "$uninstall_log"
+    set +e
+    PATH="$order_stub_dir" /bin/bash "$app_dir/Linux-Uninstall.sh" --cli >/dev/null 2>&1
+    status=$?
+    set -e
+    assert_status "$status" 0
+    assert_file_contains "$order_log" "kgx:-- bash "
+    assert_file_not_contains "$order_log" "gnome-terminal:"
+    assert_not_exists "$uninstall_log"
+    pass "Linux wrapper terminal detection prefers kgx before gnome-terminal (uninstall)"
 }
 
 scenario_configure_paths_cli

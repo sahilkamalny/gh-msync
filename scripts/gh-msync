@@ -185,7 +185,7 @@ RUN_UNINSTALL_INTEGRATIONS=0
 CONFIGURE_ARGS=()
 for arg in "$@"; do
     case "$arg" in
-        --configure|--config)
+        --configure | --config)
             RUN_CONFIGURE=1
             ;;
         --install-integrations)
@@ -194,7 +194,7 @@ for arg in "$@"; do
         --uninstall-integrations)
             RUN_UNINSTALL_INTEGRATIONS=1
             ;;
-        --cli|--headless)
+        --cli | --headless)
             CONFIGURE_ARGS+=("$arg")
             ;;
     esac
@@ -253,7 +253,7 @@ if [ -f "$CONFIG_FILE" ]; then
         [[ -z "$line" || "$line" == \#* ]] && continue
         expanded_path="$(expand_home_path "$line")"
         CONFIG_DIRS+=("$expanded_path")
-    done < "$CONFIG_FILE"
+    done <"$CONFIG_FILE"
 fi
 
 FORCE_CLI=0
@@ -270,10 +270,10 @@ for arg in "$@"; do
         continue
     fi
     case "$arg" in
-        --cli|--headless)
+        --cli | --headless)
             FORCE_CLI=1
             ;;
-        --install-integrations|--uninstall-integrations)
+        --install-integrations | --uninstall-integrations)
             # handled earlier
             ;;
         --no-ssh-upgrade)
@@ -282,10 +282,10 @@ for arg in "$@"; do
         --ssh-upgrade)
             AUTO_UPGRADE_SSH=1
             ;;
-        -h|--help)
+        -h | --help)
             SHOW_HELP=1
             ;;
-        --configure|--config)
+        --configure | --config)
             # handled earlier
             ;;
         --)
@@ -349,7 +349,7 @@ print_box() {
     local horizontal
 
     title_width="$(string_display_width "$title")"
-    inner_width=$(( title_width + 3 ))
+    inner_width=$((title_width + 3))
     horizontal="$(printf '%*s' "$inner_width" '' | tr ' ' '━')"
     echo -e "${border_color}┏${horizontal}┓${RESET}"
     echo -e "${border_color}┃${RESET} ${title_color}${title}${RESET}  ${border_color}┃${RESET}"
@@ -387,7 +387,7 @@ pids=()
 tmp_files=()
 repo_paths=()
 before_commits=()
-statuses=() # 0=Pulling, 1=Skipped, 2=Error Accessing
+statuses=()     # 0=Pulling, 1=Skipped, 2=Error Accessing
 ssh_upgraded=() # 1 if origin changed from HTTPS to SSH
 GH_REPO_LIST_FILE=""
 
@@ -408,7 +408,7 @@ count=0
 for repo in "${repos[@]}"; do
     repo_paths[count]="$repo"
     ssh_upgraded[count]=0
-    
+
     cd "$repo" || {
         statuses[count]=2
         ((count++))
@@ -442,7 +442,7 @@ for repo in "${repos[@]}"; do
 
     statuses[count]=0
     before_commits[count]=$(git rev-parse HEAD 2>/dev/null)
-    
+
     tmp=$(mktemp 2>/dev/null || true)
     if [ -z "$tmp" ]; then
         statuses[count]=2
@@ -450,15 +450,15 @@ for repo in "${repos[@]}"; do
         continue
     fi
     tmp_files[count]="$tmp"
-    
+
     git pull --rebase >"$tmp" 2>&1 &
     pids[count]=$!
-    
+
     ((count++))
 done
 
 # Wait for all background pulls to finish, with an animated spinner
-spinner=( "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏" )
+spinner=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
 spin_idx=0
 
 while true; do
@@ -469,15 +469,15 @@ while true; do
             break
         fi
     done
-    
+
     if [ $jobs_running -eq 0 ]; then
         break
     fi
-    
+
     if [ "$IS_TTY" -eq 1 ]; then
         printf "\r    ${BLUE}%s  Fetching updates from GitHub...${RESET}" "${spinner[$spin_idx]}"
     fi
-    spin_idx=$(( (spin_idx + 1) % 10 ))
+    spin_idx=$(((spin_idx + 1) % 10))
     sleep 0.1
 done
 
@@ -499,7 +499,7 @@ for i in "${!repo_paths[@]}"; do
     fi
     printf "${PAD}${BLUE}[%d/%d]${RESET} %s " "$display_count" "$total" "$REPO_NAME"
     ((display_count++))
-    
+
     if [ "${statuses[$i]}" -eq 2 ]; then
         echo -e "${BLUE}...${RESET} ${RED}× unable to access repository${RESET}"
         continue
@@ -508,14 +508,14 @@ for i in "${!repo_paths[@]}"; do
         echo -e "${BLUE}...${RESET} ${YELLOW}△ modified files, sync skipped${RESET}${upgrade_note}"
         continue
     fi
-    
+
     # Check wait status of the specific background job
     wait "${pids[$i]}" 2>/dev/null
     RESULT=$?
-    
+
     cd "$repo" || continue
     after_commit=$(git rev-parse HEAD 2>/dev/null)
-    
+
     if [ $RESULT -ne 0 ]; then
         git rebase --abort 2>/dev/null || true
         echo -e "${BLUE}...${RESET} ${RED}× pull failed (rebase aborted to protect repo)${RESET}${upgrade_note}"
@@ -555,122 +555,122 @@ if command -v gh >/dev/null 2>&1; then
             read -r clone_choice
             echo ""
         fi
-        
+
         if [[ ! "$clone_choice" =~ ^[Yy]$ ]]; then
             echo -e "    ${BLUE}No repositories cloned.${RESET}\n"
         else
-        # Construct an array of local GitHub repo keys (owner/repo, lowercase)
-        local_repo_keys=()
-        for repo_dir in "${repos[@]}"; do
-            if [ -d "$repo_dir/.git" ]; then
-                url=$(cd "$repo_dir" && git remote get-url origin 2>/dev/null)
-                if [ -n "$url" ]; then
-                    repo_key=$(normalize_github_remote_key "$url" 2>/dev/null || true)
-                    [ -n "$repo_key" ] && local_repo_keys+=("$repo_key")
+            # Construct an array of local GitHub repo keys (owner/repo, lowercase)
+            local_repo_keys=()
+            for repo_dir in "${repos[@]}"; do
+                if [ -d "$repo_dir/.git" ]; then
+                    url=$(cd "$repo_dir" && git remote get-url origin 2>/dev/null)
+                    if [ -n "$url" ]; then
+                        repo_key=$(normalize_github_remote_key "$url" 2>/dev/null || true)
+                        [ -n "$repo_key" ] && local_repo_keys+=("$repo_key")
+                    fi
                 fi
-            fi
-        done
-        
-        missing_repos=()
-        missing_urls=()
-        GH_DISCOVERY_FAILED=0
-        GH_DISCOVERY_REASON=""
-
-        # Fetch remote repos from GitHub using gh asynchronously with spinner
-        GH_REPO_LIST_FILE="$(mktemp 2>/dev/null || true)"
-        if [ -z "$GH_REPO_LIST_FILE" ]; then
-            GH_DISCOVERY_FAILED=1
-            GH_DISCOVERY_REASON="tempfile"
-        else
-            gh repo list --limit 1000 --json nameWithOwner,sshUrl,url --jq '.[] | "\(.nameWithOwner)|\(.sshUrl)|\(.url)"' > "$GH_REPO_LIST_FILE" 2>/dev/null &
-            gh_pid=$!
-
-            spinner=( "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏" )
-            spin_idx=0
-
-            while kill -0 "$gh_pid" 2>/dev/null; do
-                if [ "$IS_TTY" -eq 1 ]; then
-                    printf "\r    ${BLUE}%s  Fetching your repository list from GitHub...${RESET}" "${spinner[$spin_idx]}"
-                fi
-                spin_idx=$(( (spin_idx + 1) % 10 ))
-                sleep 0.1
             done
 
-            # Clear the spinner line
-            if [ "$IS_TTY" -eq 1 ]; then
-                printf "\r\033[K"
-            fi
-            wait "$gh_pid" 2>/dev/null
-            gh_result=$?
+            missing_repos=()
+            missing_urls=()
+            GH_DISCOVERY_FAILED=0
+            GH_DISCOVERY_REASON=""
 
-            if [ "$gh_result" -ne 0 ]; then
+            # Fetch remote repos from GitHub using gh asynchronously with spinner
+            GH_REPO_LIST_FILE="$(mktemp 2>/dev/null || true)"
+            if [ -z "$GH_REPO_LIST_FILE" ]; then
                 GH_DISCOVERY_FAILED=1
-                GH_DISCOVERY_REASON="gh_command"
+                GH_DISCOVERY_REASON="tempfile"
             else
-                echo -e "    ${BLUE}✓  Fetched repository list from GitHub.${RESET}"
+                gh repo list --limit 1000 --json nameWithOwner,sshUrl,url --jq '.[] | "\(.nameWithOwner)|\(.sshUrl)|\(.url)"' >"$GH_REPO_LIST_FILE" 2>/dev/null &
+                gh_pid=$!
 
-                remote_repos="$(cat "$GH_REPO_LIST_FILE")"
-                rm -f "$GH_REPO_LIST_FILE"
-                GH_REPO_LIST_FILE=""
+                spinner=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+                spin_idx=0
 
-                while IFS="|" read -r name_with_owner ssh_url https_url; do
-                    [ -z "$name_with_owner" ] && continue
-
-                    check_key=$(normalize_github_remote_key "$ssh_url" 2>/dev/null || normalize_github_remote_key "$https_url" 2>/dev/null || true)
-                    [ -n "$check_key" ] || continue
-
-                    found=0
-                    for l_key in "${local_repo_keys[@]}"; do
-                        if [ "$l_key" == "$check_key" ]; then
-                            found=1
-                            break
-                        fi
-                    done
-
-                    if [ $found -eq 0 ]; then
-                        clone_url="$ssh_url"
-                        if [ "$AUTO_UPGRADE_SSH" -eq 0 ] && [ -n "$https_url" ]; then
-                            clone_url="$https_url"
-                        fi
-                        missing_repos+=("$name_with_owner")
-                        missing_urls+=("$clone_url")
+                while kill -0 "$gh_pid" 2>/dev/null; do
+                    if [ "$IS_TTY" -eq 1 ]; then
+                        printf "\r    ${BLUE}%s  Fetching your repository list from GitHub...${RESET}" "${spinner[$spin_idx]}"
                     fi
-                done <<< "$remote_repos"
-            fi
-        fi
+                    spin_idx=$(((spin_idx + 1) % 10))
+                    sleep 0.1
+                done
 
-        if [ "$GH_DISCOVERY_FAILED" -eq 1 ]; then
-            if [ "$GH_DISCOVERY_REASON" = "tempfile" ]; then
-                echo -e "    ${RED}× Unable to create a temporary file for GitHub repository discovery.${RESET}\n"
-            else
-                echo -e "    ${RED}× Unable to fetch your repository list from GitHub right now.${RESET}\n"
-            fi
-            echo -e "    ${BLUE}No repositories cloned.${RESET}\n"
-        elif [ ${#missing_repos[@]} -gt 0 ]; then
-            SELECTED_REPOS=""
-            CLONE_DIR=""
+                # Clear the spinner line
+                if [ "$IS_TTY" -eq 1 ]; then
+                    printf "\r\033[K"
+                fi
+                wait "$gh_pid" 2>/dev/null
+                gh_result=$?
 
-            HAS_GUI=0
-            if [ "$FORCE_CLI" -eq 0 ]; then
-                if [[ "$OS" == "Darwin" ]] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
-                    HAS_GUI=1
-                elif [[ "$OS" == "Linux" ]] && { [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; }; then
-                    HAS_GUI=1
+                if [ "$gh_result" -ne 0 ]; then
+                    GH_DISCOVERY_FAILED=1
+                    GH_DISCOVERY_REASON="gh_command"
+                else
+                    echo -e "    ${BLUE}✓  Fetched repository list from GitHub.${RESET}"
+
+                    remote_repos="$(cat "$GH_REPO_LIST_FILE")"
+                    rm -f "$GH_REPO_LIST_FILE"
+                    GH_REPO_LIST_FILE=""
+
+                    while IFS="|" read -r name_with_owner ssh_url https_url; do
+                        [ -z "$name_with_owner" ] && continue
+
+                        check_key=$(normalize_github_remote_key "$ssh_url" 2>/dev/null || normalize_github_remote_key "$https_url" 2>/dev/null || true)
+                        [ -n "$check_key" ] || continue
+
+                        found=0
+                        for l_key in "${local_repo_keys[@]}"; do
+                            if [ "$l_key" == "$check_key" ]; then
+                                found=1
+                                break
+                            fi
+                        done
+
+                        if [ $found -eq 0 ]; then
+                            clone_url="$ssh_url"
+                            if [ "$AUTO_UPGRADE_SSH" -eq 0 ] && [ -n "$https_url" ]; then
+                                clone_url="$https_url"
+                            fi
+                            missing_repos+=("$name_with_owner")
+                            missing_urls+=("$clone_url")
+                        fi
+                    done <<<"$remote_repos"
                 fi
             fi
 
-            if [ "$HAS_GUI" -eq 1 ]; then
-                if [[ "$OS" == "Darwin" ]]; then
-                    # macOS GUI
-                    echo -ne "\n    \033[3mPlease interact with the pop-up...\033[0m"
-                    repo_list_str=""
-                    for repo in "${missing_repos[@]}"; do
-                        repo_clean="$(escape_applescript_string "$repo")"
-                        repo_list_str+="\"$repo_clean\","
-                    done
-                    repo_list_str="${repo_list_str%,}"
-                    
-                    SELECTED_REPOS=$(osascript -e "
+            if [ "$GH_DISCOVERY_FAILED" -eq 1 ]; then
+                if [ "$GH_DISCOVERY_REASON" = "tempfile" ]; then
+                    echo -e "    ${RED}× Unable to create a temporary file for GitHub repository discovery.${RESET}\n"
+                else
+                    echo -e "    ${RED}× Unable to fetch your repository list from GitHub right now.${RESET}\n"
+                fi
+                echo -e "    ${BLUE}No repositories cloned.${RESET}\n"
+            elif [ ${#missing_repos[@]} -gt 0 ]; then
+                SELECTED_REPOS=""
+                CLONE_DIR=""
+
+                HAS_GUI=0
+                if [ "$FORCE_CLI" -eq 0 ]; then
+                    if [[ "$OS" == "Darwin" ]] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
+                        HAS_GUI=1
+                    elif [[ "$OS" == "Linux" ]] && { [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; }; then
+                        HAS_GUI=1
+                    fi
+                fi
+
+                if [ "$HAS_GUI" -eq 1 ]; then
+                    if [[ "$OS" == "Darwin" ]]; then
+                        # macOS GUI
+                        echo -ne "\n    \033[3mPlease interact with the pop-up...\033[0m"
+                        repo_list_str=""
+                        for repo in "${missing_repos[@]}"; do
+                            repo_clean="$(escape_applescript_string "$repo")"
+                            repo_list_str+="\"$repo_clean\","
+                        done
+                        repo_list_str="${repo_list_str%,}"
+
+                        SELECTED_REPOS=$(osascript -e "
                         try
                             set repoList to {$repo_list_str}
                             set chosen to choose from list repoList with prompt \"Select repositories to clone:\" with title \"Clone Missing Repositories\" with multiple selections allowed
@@ -684,19 +684,19 @@ if command -v gh >/dev/null 2>&1; then
                             return \"\"
                         end try
                     " 2>/dev/null || echo "")
-                    
-                    if [ -n "$SELECTED_REPOS" ]; then
-                        if [ ${#BASE_DIRS[@]} -eq 1 ]; then
-                            CLONE_DIR="${BASE_DIRS[0]}"
-                        else
-                            dir_list_str=""
-                            for dir in "${BASE_DIRS[@]}"; do
-                                dir_clean="$(escape_applescript_string "$dir")"
-                                dir_list_str+="\"$dir_clean\","
-                            done
-                            dir_list_str="${dir_list_str%,}"
-                            
-                            CLONE_DIR=$(osascript -e "
+
+                        if [ -n "$SELECTED_REPOS" ]; then
+                            if [ ${#BASE_DIRS[@]} -eq 1 ]; then
+                                CLONE_DIR="${BASE_DIRS[0]}"
+                            else
+                                dir_list_str=""
+                                for dir in "${BASE_DIRS[@]}"; do
+                                    dir_clean="$(escape_applescript_string "$dir")"
+                                    dir_list_str+="\"$dir_clean\","
+                                done
+                                dir_list_str="${dir_list_str%,}"
+
+                                CLONE_DIR=$(osascript -e "
                                 try
                                     set dirList to {$dir_list_str}
                                     set chosen to choose from list dirList with prompt \"Select destination for cloned repositories:\" with title \"Clone Destination\" without multiple selections allowed
@@ -709,196 +709,196 @@ if command -v gh >/dev/null 2>&1; then
                                     return \"\"
                                 end try
                             " 2>/dev/null || echo "")
-                        fi
-                    fi
-                    echo -ne "\r\033[K\033[1A\r\033[K"
-                    
-                elif [[ "$OS" == "Linux" ]]; then
-                    # Linux GUI
-                    if command -v zenity >/dev/null; then
-                        echo -ne "\n    \033[3mPlease interact with the pop-up...\033[0m"
-                        list_args=()
-                        for repo in "${missing_repos[@]}"; do
-                            list_args+=(FALSE "$repo")
-                        done
-                        
-                        selected=$(zenity --list --checklist --title="Clone Missing Repositories" --text="Select repositories to clone:" --column="Clone" --column="Repository" "${list_args[@]}" --separator="|" 2>/dev/null)
-                        if [ -n "$selected" ]; then
-                            SELECTED_REPOS="$selected"
-                            
-                            if [ ${#BASE_DIRS[@]} -eq 1 ]; then
-                                CLONE_DIR="${BASE_DIRS[0]}"
-                            else
-                                dir_args=()
-                                for dir in "${BASE_DIRS[@]}"; do
-                                    dir_args+=(FALSE "$dir")
-                                done
-                                dir_args[0]="TRUE"
-                                
-                                CLONE_DIR=$(zenity --list --radiolist --title="Clone Destination" --text="Select destination for cloned repositories:" --column="Select" --column="Directory" "${dir_args[@]}" 2>/dev/null)
                             fi
                         fi
                         echo -ne "\r\033[K\033[1A\r\033[K"
-                    elif command -v kdialog >/dev/null; then
-                        echo -ne "\n    \033[3mPlease interact with the pop-up...\033[0m"
-                        list_args=()
-                        for repo in "${missing_repos[@]}"; do
-                            list_args+=("$repo" "$repo" "off")
-                        done
-                        
-                        selected=$(kdialog --checklist "Select repositories to clone:" "${list_args[@]}" --title "Clone Missing Repositories" --separator="|" 2>/dev/null)
-                        if [ -n "$selected" ]; then
-                            SELECTED_REPOS=$(echo "$selected" | tr -d '"')
-                            
-                            if [ ${#BASE_DIRS[@]} -eq 1 ]; then
-                                CLONE_DIR="${BASE_DIRS[0]}"
-                            else
-                                dir_args=()
-                                for dir in "${BASE_DIRS[@]}"; do
-                                    dir_args+=("$dir" "$dir" "off")
-                                done
-                                dir_args[2]="on"
-                                
-                                CLONE_DIR=$(kdialog --radiolist "Select destination for cloned repositories:" "${dir_args[@]}" --title "Clone Destination" 2>/dev/null)
-                                CLONE_DIR=$(echo "$CLONE_DIR" | tr -d '"')
-                            fi
-                        fi
-                        echo -ne "\r\033[K\033[1A\r\033[K"
-                    else
-                        HAS_GUI=0
-                    fi
-                fi
-            fi
-            
-            # Fallback to terminal prompt if no GUI tool was available
-            if [ "$HAS_GUI" -eq 0 ]; then
-                echo ""
-                if [ "${#missing_repos[@]}" -eq 1 ]; then
-                    echo -e "    ${YELLOW}You have 1 repository on GitHub that is not cloned locally:${RESET}"
-                else
-                    echo -e "    ${YELLOW}You have ${#missing_repos[@]} repositories on GitHub that are not cloned locally:${RESET}"
-                fi
-                echo ""
-                for i in "${!missing_repos[@]}"; do
-                    # Strip the github username from the repo string
-                    repo_name_only=$(basename "${missing_repos[$i]}")
-                    echo -e "      ${BLUE}$((i+1)))${RESET} ${repo_name_only}"
-                done
-                echo ""
-                if [ -t 0 ]; then
-                    read -p "$(echo -e "    ${CYAN}Enter comma-separated numbers to clone (1-${#missing_repos[@]}): ${RESET}")" -r choices
-                    if [ -n "$choices" ]; then
-                        IFS=',' read -ra CH_ARR <<< "$choices"
-                        for c in "${CH_ARR[@]}"; do
-                            # cross-platform trim
-                            c=$(echo "$c" | awk '{$1=$1};1')
-                            if [[ "$c" =~ ^[0-9]+$ ]] && [ "$c" -ge 1 ] && [ "$c" -le "${#missing_repos[@]}" ]; then
-                                SELECTED_REPOS+="${missing_repos[$((c-1))]}|"
-                            fi
-                        done
-                        SELECTED_REPOS="${SELECTED_REPOS%|}"
-                        
-                        if [ -n "$SELECTED_REPOS" ]; then
-                            if [ ${#BASE_DIRS[@]} -gt 1 ]; then
-                                CLONE_DIR=""
-                                echo ""
-                                echo -e "    ${YELLOW}Available directories for cloning:${RESET}\n"
-                                for i in "${!BASE_DIRS[@]}"; do
-                                    echo -e "      ${BLUE}$((i+1)))${RESET} ${BASE_DIRS[$i]}"
-                                done
-                                echo ""
-                                read -p "$(echo -e "    ${CYAN}Select a directory (1-${#BASE_DIRS[@]}): ${RESET}")" -r dir_choice
-                                if [[ "$dir_choice" =~ ^[0-9]+$ ]] && [ "$dir_choice" -ge 1 ] && [ "$dir_choice" -le "${#BASE_DIRS[@]}" ]; then
-                                    CLONE_DIR="${BASE_DIRS[$((dir_choice-1))]}"
-                                fi
-                            else
-                                CLONE_DIR="${BASE_DIRS[0]}"
-                            fi
-                        fi
-                    fi
-                fi
-            fi
 
-            if [ -n "$SELECTED_REPOS" ] && [ -n "$CLONE_DIR" ]; then
-                echo ""
-                mkdir -p "$CLONE_DIR"
-                
-                IFS='|' read -ra SEL_ARR <<< "$SELECTED_REPOS"
-                echo -e "    ${BLUE}↓  Cloning ${#SEL_ARR[@]} repositories into $CLONE_DIR...${RESET}\n"
-                
-                clone_pids=()
-                clone_repos=()
-                
-                for sel_repo in "${SEL_ARR[@]}"; do
-                    target_url=""
-                    for i in "${!missing_repos[@]}"; do
-                        if [ "${missing_repos[$i]}" == "$sel_repo" ]; then
-                            target_url="${missing_urls[$i]}"
-                            break
+                    elif [[ "$OS" == "Linux" ]]; then
+                        # Linux GUI
+                        if command -v zenity >/dev/null; then
+                            echo -ne "\n    \033[3mPlease interact with the pop-up...\033[0m"
+                            list_args=()
+                            for repo in "${missing_repos[@]}"; do
+                                list_args+=(FALSE "$repo")
+                            done
+
+                            selected=$(zenity --list --checklist --title="Clone Missing Repositories" --text="Select repositories to clone:" --column="Clone" --column="Repository" "${list_args[@]}" --separator="|" 2>/dev/null)
+                            if [ -n "$selected" ]; then
+                                SELECTED_REPOS="$selected"
+
+                                if [ ${#BASE_DIRS[@]} -eq 1 ]; then
+                                    CLONE_DIR="${BASE_DIRS[0]}"
+                                else
+                                    dir_args=()
+                                    for dir in "${BASE_DIRS[@]}"; do
+                                        dir_args+=(FALSE "$dir")
+                                    done
+                                    dir_args[0]="TRUE"
+
+                                    CLONE_DIR=$(zenity --list --radiolist --title="Clone Destination" --text="Select destination for cloned repositories:" --column="Select" --column="Directory" "${dir_args[@]}" 2>/dev/null)
+                                fi
+                            fi
+                            echo -ne "\r\033[K\033[1A\r\033[K"
+                        elif command -v kdialog >/dev/null; then
+                            echo -ne "\n    \033[3mPlease interact with the pop-up...\033[0m"
+                            list_args=()
+                            for repo in "${missing_repos[@]}"; do
+                                list_args+=("$repo" "$repo" "off")
+                            done
+
+                            selected=$(kdialog --checklist "Select repositories to clone:" "${list_args[@]}" --title "Clone Missing Repositories" --separator="|" 2>/dev/null)
+                            if [ -n "$selected" ]; then
+                                SELECTED_REPOS=$(echo "$selected" | tr -d '"')
+
+                                if [ ${#BASE_DIRS[@]} -eq 1 ]; then
+                                    CLONE_DIR="${BASE_DIRS[0]}"
+                                else
+                                    dir_args=()
+                                    for dir in "${BASE_DIRS[@]}"; do
+                                        dir_args+=("$dir" "$dir" "off")
+                                    done
+                                    dir_args[2]="on"
+
+                                    CLONE_DIR=$(kdialog --radiolist "Select destination for cloned repositories:" "${dir_args[@]}" --title "Clone Destination" 2>/dev/null)
+                                    CLONE_DIR=$(echo "$CLONE_DIR" | tr -d '"')
+                                fi
+                            fi
+                            echo -ne "\r\033[K\033[1A\r\033[K"
+                        else
+                            HAS_GUI=0
                         fi
-                    done
-                    
-                    if [ -n "$target_url" ]; then
-                        repo_name=$(basename "$target_url" .git)
-                        clone_repos+=("$repo_name")
-                        
-                        (cd "$CLONE_DIR" && git clone -q "$target_url" >/dev/null 2>&1) &
-                        clone_pids+=($!)
                     fi
-                done
-                
-                spinner=( "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏" )
-                spin_idx=0
-                
-                while true; do
-                    jobs_running=0
-                    for pid in "${clone_pids[@]}"; do
-                        if kill -0 "$pid" 2>/dev/null; then
-                            jobs_running=1
-                            break
-                        fi
-                    done
-                    
-                    if [ $jobs_running -eq 0 ]; then
-                        break
-                    fi
-                    
-                    if [ "$IS_TTY" -eq 1 ]; then
-                        printf "\r    ${BLUE}%s  Cloning repositories...${RESET}" "${spinner[$spin_idx]}"
-                    fi
-                    spin_idx=$(( (spin_idx + 1) % 10 ))
-                    sleep 0.1
-                done
-                
-                # Clear the spinner line
-                if [ "$IS_TTY" -eq 1 ]; then
-                    printf "\r\033[K"
                 fi
-                
-                display_count=1
-                for i in "${!clone_pids[@]}"; do
-                    wait "${clone_pids[$i]}" 2>/dev/null
-                    result=$?
-                    
-                    repo_name="${clone_repos[$i]}"
-                    printf "    ${BLUE}[%d/%d]${RESET} %s " "$display_count" "${#SEL_ARR[@]}" "$repo_name"
-                    
-                    if [ $result -eq 0 ]; then
-                        echo -e "${BLUE}...${RESET} ${GREEN}✓ cloned${RESET}"
+
+                # Fallback to terminal prompt if no GUI tool was available
+                if [ "$HAS_GUI" -eq 0 ]; then
+                    echo ""
+                    if [ "${#missing_repos[@]}" -eq 1 ]; then
+                        echo -e "    ${YELLOW}You have 1 repository on GitHub that is not cloned locally:${RESET}"
                     else
-                        echo -e "${BLUE}...${RESET} ${RED}× failed to clone${RESET}"
+                        echo -e "    ${YELLOW}You have ${#missing_repos[@]} repositories on GitHub that are not cloned locally:${RESET}"
                     fi
-                    
-                    ((display_count++))
-                done
-                
-                echo -e "\n    ${GREEN}↓  Cloning complete.${RESET}\n"
+                    echo ""
+                    for i in "${!missing_repos[@]}"; do
+                        # Strip the github username from the repo string
+                        repo_name_only=$(basename "${missing_repos[$i]}")
+                        echo -e "      ${BLUE}$((i + 1)))${RESET} ${repo_name_only}"
+                    done
+                    echo ""
+                    if [ -t 0 ]; then
+                        read -p "$(echo -e "    ${CYAN}Enter comma-separated numbers to clone (1-${#missing_repos[@]}): ${RESET}")" -r choices
+                        if [ -n "$choices" ]; then
+                            IFS=',' read -ra CH_ARR <<<"$choices"
+                            for c in "${CH_ARR[@]}"; do
+                                # cross-platform trim
+                                c=$(echo "$c" | awk '{$1=$1};1')
+                                if [[ "$c" =~ ^[0-9]+$ ]] && [ "$c" -ge 1 ] && [ "$c" -le "${#missing_repos[@]}" ]; then
+                                    SELECTED_REPOS+="${missing_repos[$((c - 1))]}|"
+                                fi
+                            done
+                            SELECTED_REPOS="${SELECTED_REPOS%|}"
+
+                            if [ -n "$SELECTED_REPOS" ]; then
+                                if [ ${#BASE_DIRS[@]} -gt 1 ]; then
+                                    CLONE_DIR=""
+                                    echo ""
+                                    echo -e "    ${YELLOW}Available directories for cloning:${RESET}\n"
+                                    for i in "${!BASE_DIRS[@]}"; do
+                                        echo -e "      ${BLUE}$((i + 1)))${RESET} ${BASE_DIRS[$i]}"
+                                    done
+                                    echo ""
+                                    read -p "$(echo -e "    ${CYAN}Select a directory (1-${#BASE_DIRS[@]}): ${RESET}")" -r dir_choice
+                                    if [[ "$dir_choice" =~ ^[0-9]+$ ]] && [ "$dir_choice" -ge 1 ] && [ "$dir_choice" -le "${#BASE_DIRS[@]}" ]; then
+                                        CLONE_DIR="${BASE_DIRS[$((dir_choice - 1))]}"
+                                    fi
+                                else
+                                    CLONE_DIR="${BASE_DIRS[0]}"
+                                fi
+                            fi
+                        fi
+                    fi
+                fi
+
+                if [ -n "$SELECTED_REPOS" ] && [ -n "$CLONE_DIR" ]; then
+                    echo ""
+                    mkdir -p "$CLONE_DIR"
+
+                    IFS='|' read -ra SEL_ARR <<<"$SELECTED_REPOS"
+                    echo -e "    ${BLUE}↓  Cloning ${#SEL_ARR[@]} repositories into $CLONE_DIR...${RESET}\n"
+
+                    clone_pids=()
+                    clone_repos=()
+
+                    for sel_repo in "${SEL_ARR[@]}"; do
+                        target_url=""
+                        for i in "${!missing_repos[@]}"; do
+                            if [ "${missing_repos[$i]}" == "$sel_repo" ]; then
+                                target_url="${missing_urls[$i]}"
+                                break
+                            fi
+                        done
+
+                        if [ -n "$target_url" ]; then
+                            repo_name=$(basename "$target_url" .git)
+                            clone_repos+=("$repo_name")
+
+                            (cd "$CLONE_DIR" && git clone -q "$target_url" >/dev/null 2>&1) &
+                            clone_pids+=($!)
+                        fi
+                    done
+
+                    spinner=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+                    spin_idx=0
+
+                    while true; do
+                        jobs_running=0
+                        for pid in "${clone_pids[@]}"; do
+                            if kill -0 "$pid" 2>/dev/null; then
+                                jobs_running=1
+                                break
+                            fi
+                        done
+
+                        if [ $jobs_running -eq 0 ]; then
+                            break
+                        fi
+
+                        if [ "$IS_TTY" -eq 1 ]; then
+                            printf "\r    ${BLUE}%s  Cloning repositories...${RESET}" "${spinner[$spin_idx]}"
+                        fi
+                        spin_idx=$(((spin_idx + 1) % 10))
+                        sleep 0.1
+                    done
+
+                    # Clear the spinner line
+                    if [ "$IS_TTY" -eq 1 ]; then
+                        printf "\r\033[K"
+                    fi
+
+                    display_count=1
+                    for i in "${!clone_pids[@]}"; do
+                        wait "${clone_pids[$i]}" 2>/dev/null
+                        result=$?
+
+                        repo_name="${clone_repos[$i]}"
+                        printf "    ${BLUE}[%d/%d]${RESET} %s " "$display_count" "${#SEL_ARR[@]}" "$repo_name"
+
+                        if [ $result -eq 0 ]; then
+                            echo -e "${BLUE}...${RESET} ${GREEN}✓ cloned${RESET}"
+                        else
+                            echo -e "${BLUE}...${RESET} ${RED}× failed to clone${RESET}"
+                        fi
+
+                        ((display_count++))
+                    done
+
+                    echo -e "\n    ${GREEN}↓  Cloning complete.${RESET}\n"
+                else
+                    echo -e "\n    ${BLUE}No repositories cloned.${RESET}\n"
+                fi
             else
-                echo -e "\n    ${BLUE}No repositories cloned.${RESET}\n"
+                echo -e "\n    ${GREEN}✓  All your remote repositories are already cloned locally.${RESET}\n"
             fi
-        else
-            echo -e "\n    ${GREEN}✓  All your remote repositories are already cloned locally.${RESET}\n"
-        fi
         fi
     else
         print_box "❏  Missing Repositories" "$BLUE" "$CYAN"

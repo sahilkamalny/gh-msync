@@ -68,7 +68,7 @@ write_launcher_script() {
     fi
     preferred_escaped="$(printf '%s' "$preferred" | sed 's/\\/\\\\/g; s/"/\\"/g')"
 
-    cat > "$launcher_script" <<EOF_LAUNCHER
+    cat >"$launcher_script" <<EOF_LAUNCHER
 #!/bin/bash
 set -e
 
@@ -170,7 +170,7 @@ install_macos_app() {
         return 0
     fi
 
-    cat > "$app_dir/Contents/Resources/run.sh" <<EOF_MACRUN
+    cat >"$app_dir/Contents/Resources/run.sh" <<EOF_MACRUN
 #!/bin/bash
 export APP_GUI=1
 export SHELL_SESSIONS_DISABLE=1
@@ -202,7 +202,7 @@ install_linux_desktop_entry() {
 
     mkdir -p "$desktop_entry_dir"
 
-    cat > "$desktop_file" <<EOF_DESKTOP
+    cat >"$desktop_file" <<EOF_DESKTOP
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -301,20 +301,29 @@ while [ $# -gt 0 ]; do
             ;;
         --preferred-script)
             shift
-            [ $# -gt 0 ] || { usage >&2; exit 2; }
+            [ $# -gt 0 ] || {
+                usage >&2
+                exit 2
+            }
             PREFERRED_SCRIPT="$1"
             ;;
         --legacy-repo-dir)
             shift
-            [ $# -gt 0 ] || { usage >&2; exit 2; }
+            [ $# -gt 0 ] || {
+                usage >&2
+                exit 2
+            }
             LEGACY_REPO_DIR="$1"
             ;;
         --config-dir)
             shift
-            [ $# -gt 0 ] || { usage >&2; exit 2; }
+            [ $# -gt 0 ] || {
+                usage >&2
+                exit 2
+            }
             CONFIG_DIR="$1"
             ;;
-        -h|--help)
+        -h | --help)
             usage
             exit 0
             ;;

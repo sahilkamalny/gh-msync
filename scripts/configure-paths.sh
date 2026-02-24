@@ -43,7 +43,7 @@ print_box() {
     local horizontal
 
     title_width="$(string_display_width "$title")"
-    inner_width=$(( title_width + 3 ))
+    inner_width=$((title_width + 3))
     horizontal="$(printf '%*s' "$inner_width" '' | tr ' ' '━')"
     echo -e "${border_color}┏${horizontal}┓${RESET}"
     echo -e "${border_color}┃${RESET} ${title_color}${title}${RESET}  ${border_color}┃${RESET}"
@@ -85,7 +85,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
         echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
         APPLESCRIPT_OPTS=("-e" "set userPaths to {}")
         if [ -n "$USER_PATHS" ]; then
-            IFS=',' read -ra PATH_ARRAY <<< "$USER_PATHS"
+            IFS=',' read -ra PATH_ARRAY <<<"$USER_PATHS"
             for p in "${PATH_ARRAY[@]}"; do
                 escaped_p="$(escape_applescript_string "$p")"
                 APPLESCRIPT_OPTS+=("-e" "set end of userPaths to POSIX path of \"$escaped_p\"")
@@ -145,7 +145,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
     elif [[ "$OS" == "Linux" ]]; then
         user_paths_array=()
         if [ -n "$USER_PATHS" ]; then
-            IFS=',' read -ra PATH_ARRAY <<< "$USER_PATHS"
+            IFS=',' read -ra PATH_ARRAY <<<"$USER_PATHS"
             for p in "${PATH_ARRAY[@]}"; do
                 user_paths_array+=("$p")
             done
@@ -173,12 +173,15 @@ if [ "$HAS_GUI" -eq 1 ]; then
                         done
                         to_remove=$(zenity --list --checklist --title="Remove Folders" --text="Select folders to remove:" --column="Delete" --column="Repository Path" "${list_args[@]}" --separator="|" 2>/dev/null)
                         if [ -n "$to_remove" ]; then
-                            IFS='|' read -ra TR_ARR <<< "$to_remove"
+                            IFS='|' read -ra TR_ARR <<<"$to_remove"
                             new_array=()
                             for p in "${user_paths_array[@]}"; do
                                 keep=true
                                 for r in "${TR_ARR[@]}"; do
-                                    if [ "$p" = "$r" ]; then keep=false; break; fi
+                                    if [ "$p" = "$r" ]; then
+                                        keep=false
+                                        break
+                                    fi
                                 done
                                 $keep && new_array+=("$p")
                             done
@@ -192,7 +195,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
                 elif [ $ret -eq 1 ]; then
                     selected=$(zenity --file-selection --directory --multiple --separator="|" --title="Select a repo folder" 2>/dev/null)
                     if [ -n "$selected" ]; then
-                        IFS='|' read -ra SEL_ARR <<< "$selected"
+                        IFS='|' read -ra SEL_ARR <<<"$selected"
                         for s in "${SEL_ARR[@]}"; do user_paths_array+=("$s"); done
                     fi
                 else
@@ -210,7 +213,8 @@ if [ "$HAS_GUI" -eq 1 ]; then
                 kdialog --yesnocancel "Current Repositories:\n\n$path_string" --yes-label "Done" --no-label "Add Folder..." --cancel-label "Remove Folder..." --title "GitHub Multi-Sync Configuration" 2>/dev/null
                 ret=$?
 
-                if [ $ret -eq 0 ]; then break
+                if [ $ret -eq 0 ]; then
+                    break
                 elif [ $ret -eq 1 ]; then
                     selected=$(kdialog --getexistingdirectory "$HOME" --title "Select a repo folder" 2>/dev/null)
                     [ -n "$selected" ] && user_paths_array+=("$selected")
@@ -223,7 +227,7 @@ if [ "$HAS_GUI" -eq 1 ]; then
                             remove_items=()
                             while IFS= read -r item; do
                                 [ -n "$item" ] && remove_items+=("$item")
-                            done <<< "$to_remove"
+                            done <<<"$to_remove"
 
                             new_array=()
                             for p in "${user_paths_array[@]}"; do
@@ -251,7 +255,10 @@ if [ "$HAS_GUI" -eq 1 ]; then
         fi
 
         if [ ${#user_paths_array[@]} -gt 0 ]; then
-            USER_PATHS=$(IFS=,; echo "${user_paths_array[*]}")
+            USER_PATHS=$(
+                IFS=,
+                echo "${user_paths_array[*]}"
+            )
         else
             USER_PATHS=""
         fi
@@ -272,30 +279,30 @@ fi
 
 # Write config
 if [ -n "$USER_PATHS" ]; then
-    : > "$CONFIG_FILE"
-    IFS=',' read -ra PATH_ARRAY <<< "$USER_PATHS"
+    : >"$CONFIG_FILE"
+    IFS=',' read -ra PATH_ARRAY <<<"$USER_PATHS"
     valid_paths=0
     for p in "${PATH_ARRAY[@]}"; do
         p="$(trim_whitespace "$p")"
         if [ -n "$p" ]; then
-            echo "$p" >> "$CONFIG_FILE"
+            echo "$p" >>"$CONFIG_FILE"
             valid_paths=1
         fi
     done
     if [ "$valid_paths" -eq 0 ]; then
-        echo "$HOME/GitHub" >> "$CONFIG_FILE"
+        echo "$HOME/GitHub" >>"$CONFIG_FILE"
         USER_PATHS=""
     fi
 else
-    : > "$CONFIG_FILE"
-    echo "$HOME/GitHub" >> "$CONFIG_FILE"
+    : >"$CONFIG_FILE"
+    echo "$HOME/GitHub" >>"$CONFIG_FILE"
 fi
 
 if [ "$QUIET" -eq 0 ]; then
     print_box "❏  Saved paths"
     echo ""
     if [ -n "$USER_PATHS" ]; then
-        IFS=',' read -ra PATH_ARRAY <<< "$USER_PATHS"
+        IFS=',' read -ra PATH_ARRAY <<<"$USER_PATHS"
         for p in "${PATH_ARRAY[@]}"; do
             p="$(trim_whitespace "$p")"
             [ -n "$p" ] && echo -e "    \033[1;34m∘\033[0m $p"

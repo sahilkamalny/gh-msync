@@ -31,7 +31,7 @@ print_box() {
     local horizontal
 
     title_width="$(string_display_width "$title")"
-    inner_width=$(( title_width + 3 ))
+    inner_width=$((title_width + 3))
     horizontal="$(printf '%*s' "$inner_width" '' | tr ' ' '━')"
     echo -e "${border_color}┏${horizontal}┓\033[0m"
     echo -e "${border_color}┃\033[0m ${title_color}${title}\033[0m  ${border_color}┃\033[0m"
@@ -78,8 +78,8 @@ fi
 # Native Uninstallation Confirmation
 if [ "$HAS_GUI" -eq 1 ]; then
     if [[ "$OS" == "Darwin" ]]; then
-    echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
-    response=$(osascript -e '
+        echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
+        response=$(osascript -e '
         try
             set theResult to display dialog "Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." buttons {"Cancel", "Uninstall"} default button "Cancel" with title "GitHub Multi-Sync Uninstaller" with icon caution
             return button returned of theResult
@@ -87,30 +87,30 @@ if [ "$HAS_GUI" -eq 1 ]; then
             return "Cancel"
         end try
     ' 2>/dev/null)
-    
-    if [ "$response" != "Uninstall" ]; then
-        echo -e "\r\033[K    \033[1;33mUninstallation cancelled.\033[0m"
-        echo -e "\n\n    ©  2026 Sahil Kamal\n"
-        exit 0
-    fi
-    echo -ne "\r\033[K"
-elif [[ "$OS" == "Linux" ]]; then
-    if command -v zenity >/dev/null; then
-        echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
-        if ! zenity --question --title="GitHub Multi-Sync Uninstaller" --text="Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --ok-label="Uninstall" --cancel-label="Cancel" --icon-name=dialog-warning 2>/dev/null; then
+
+        if [ "$response" != "Uninstall" ]; then
             echo -e "\r\033[K    \033[1;33mUninstallation cancelled.\033[0m"
             echo -e "\n\n    ©  2026 Sahil Kamal\n"
             exit 0
         fi
         echo -ne "\r\033[K"
-    elif command -v kdialog >/dev/null; then
-        echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
-        if ! kdialog --warningcontinuecancel "Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --title "GitHub Multi-Sync Uninstaller" --continue-label "Uninstall" 2>/dev/null; then
-            echo -e "\r\033[K    \033[1;33mUninstallation cancelled.\033[0m"
-            echo -e "\n\n    ©  2026 Sahil Kamal\n"
-            exit 0
-        fi
-        echo -ne "\r\033[K"
+    elif [[ "$OS" == "Linux" ]]; then
+        if command -v zenity >/dev/null; then
+            echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
+            if ! zenity --question --title="GitHub Multi-Sync Uninstaller" --text="Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --ok-label="Uninstall" --cancel-label="Cancel" --icon-name=dialog-warning 2>/dev/null; then
+                echo -e "\r\033[K    \033[1;33mUninstallation cancelled.\033[0m"
+                echo -e "\n\n    ©  2026 Sahil Kamal\n"
+                exit 0
+            fi
+            echo -ne "\r\033[K"
+        elif command -v kdialog >/dev/null; then
+            echo -ne "    \033[3mPlease interact with the pop-up...\033[0m"
+            if ! kdialog --warningcontinuecancel "Are you sure you want to completely uninstall GitHub Multi-Sync?\n\nThis will remove the gh-msync command, configuration, and the desktop application." --title "GitHub Multi-Sync Uninstaller" --continue-label "Uninstall" 2>/dev/null; then
+                echo -e "\r\033[K    \033[1;33mUninstallation cancelled.\033[0m"
+                echo -e "\n\n    ©  2026 Sahil Kamal\n"
+                exit 0
+            fi
+            echo -ne "\r\033[K"
         else
             HAS_GUI=0
         fi

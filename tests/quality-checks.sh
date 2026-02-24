@@ -18,7 +18,7 @@ cd "$REPO_DIR"
 shell_files=()
 while IFS= read -r file; do
     case "$file" in
-        *.sh|*.command|gh-msync|scripts/gh-msync)
+        *.sh | *.command | gh-msync | scripts/gh-msync)
             shell_files+=("$file")
             ;;
     esac
@@ -52,22 +52,22 @@ else
     note "SKIP Homebrew formula Ruby syntax check (ruby not installed)"
 fi
 
-./gh-msync --help > "$TMP_ROOT/gh-extension-help.txt"
+./gh-msync --help >"$TMP_ROOT/gh-extension-help.txt"
 assert_file_contains "$TMP_ROOT/gh-extension-help.txt" "Usage: gh-msync"
 pass "GitHub CLI extension entrypoint forwards to core script"
 
-scripts/gh-msync --help > "$TMP_ROOT/gh-msync-help.txt"
+scripts/gh-msync --help >"$TMP_ROOT/gh-msync-help.txt"
 assert_file_contains "$TMP_ROOT/gh-msync-help.txt" "--install-integrations"
 assert_file_contains "$TMP_ROOT/gh-msync-help.txt" "--uninstall-integrations"
 pass "core help includes launcher integration flags"
 
 if command -v rg >/dev/null 2>&1; then
-    if rg -n "github-sync" -S . -g '!tests/**' > "$TMP_ROOT/stale-paths.txt"; then
+    if rg -n "github-sync" -S . -g '!tests/**' >"$TMP_ROOT/stale-paths.txt"; then
         cat "$TMP_ROOT/stale-paths.txt" >&2
         fail "stale github-sync references remain"
     fi
 else
-    if grep -RIn --exclude-dir=.git --exclude-dir=tests -- "github-sync" . > "$TMP_ROOT/stale-paths.txt"; then
+    if grep -RIn --exclude-dir=.git --exclude-dir=tests -- "github-sync" . >"$TMP_ROOT/stale-paths.txt"; then
         cat "$TMP_ROOT/stale-paths.txt" >&2
         fail "stale github-sync references remain"
     fi
@@ -125,8 +125,7 @@ else
         tests/core-behavior.sh \
         tests/real-git-sync.sh \
         tests/configure-install-uninstall.sh \
-        tests/lib/testlib.sh
-    do
+        tests/lib/testlib.sh; do
         [ -x "$path" ] || fail "expected executable bit on $path"
     done
     pass "entrypoints and test scripts are executable"

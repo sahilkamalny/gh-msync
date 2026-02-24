@@ -50,7 +50,7 @@ scenario_config_and_no_repo_handling() {
     home_dir="$TMP_ROOT/home-config"
     base_dir="$home_dir/Repos"
     mkdir -p "$home_dir/.config/gh-msync" "$base_dir"
-    cat > "$home_dir/.config/gh-msync/config" <<'EOF_CFG'
+    cat >"$home_dir/.config/gh-msync/config" <<'EOF_CFG'
   # comment
 
    ~/Repos
@@ -87,7 +87,7 @@ scenario_configure_dispatch() {
     mkdir -p "$app_dir/scripts"
     cp "$REPO_DIR/scripts/gh-msync" "$app_dir/scripts/gh-msync"
 
-    cat > "$app_dir/scripts/configure-paths.sh" <<'EOF_CFGSTUB'
+    cat >"$app_dir/scripts/configure-paths.sh" <<'EOF_CFGSTUB'
 #!/bin/bash
 set -euo pipefail
 printf '%s\n' "$*" > "${HOME}/configure-args.log"
@@ -96,7 +96,7 @@ EOF_CFGSTUB
     chmod +x "$app_dir/scripts/configure-paths.sh"
 
     # Provide helper so --configure can find it if stdout is a TTY in future changes.
-    cat > "$app_dir/scripts/system-integrations.sh" <<'EOF_INTSTUB'
+    cat >"$app_dir/scripts/system-integrations.sh" <<'EOF_INTSTUB'
 #!/bin/bash
 exit 0
 EOF_INTSTUB
@@ -122,11 +122,11 @@ scenario_stubbed_sync_logic() {
     state_dir="$TMP_ROOT/stubbed-sync-state"
     log_file="$TMP_ROOT/stubbed-sync-git.log"
     mkdir -p "$home_dir" "$base_dir" "$stub_dir" "$state_dir"
-    : > "$log_file"
+    : >"$log_file"
 
     mkdir -p "$base_dir/repo-update/.git" "$base_dir/repo-modified/.git" "$base_dir/repo-fail/.git"
 
-    cat > "$stub_dir/git" <<'EOF_GITSTUB'
+    cat >"$stub_dir/git" <<'EOF_GITSTUB'
 #!/bin/bash
 set -euo pipefail
 
@@ -235,7 +235,7 @@ exit 99
 EOF_GITSTUB
     chmod +x "$stub_dir/git"
 
-    cat > "$stub_dir/gh" <<'EOF_GHSTUB'
+    cat >"$stub_dir/gh" <<'EOF_GHSTUB'
 #!/bin/bash
 set -euo pipefail
 if [ "${1:-}" = "auth" ] && [ "${2:-}" = "status" ]; then
@@ -248,11 +248,11 @@ EOF_GHSTUB
     out="$TMP_ROOT/stubbed-sync-output.txt"
     set +e
     HOME="$home_dir" \
-    PATH="$stub_dir:$BASE_PATH" \
-    GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
-    GIT_STUB_LOG="$log_file" \
-    GIT_STUB_STATE_DIR="$state_dir" \
-    scripts/gh-msync --headless "$base_dir" >"$out" 2>&1
+        PATH="$stub_dir:$BASE_PATH" \
+        GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
+        GIT_STUB_LOG="$log_file" \
+        GIT_STUB_STATE_DIR="$state_dir" \
+        scripts/gh-msync --headless "$base_dir" >"$out" 2>&1
     status=$?
     set -e
 
@@ -272,15 +272,15 @@ EOF_GHSTUB
     pass "stubbed sync flow covers SSH upgrade, modified skip, and rebase-abort on pull failure"
 
     out="$TMP_ROOT/stubbed-sync-no-ssh.txt"
-    : > "$log_file"
+    : >"$log_file"
     rm -f "$state_dir/repo-update-updated"
     set +e
     HOME="$home_dir" \
-    PATH="$stub_dir:$BASE_PATH" \
-    GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
-    GIT_STUB_LOG="$log_file" \
-    GIT_STUB_STATE_DIR="$state_dir" \
-    scripts/gh-msync --headless --no-ssh-upgrade "$base_dir" >"$out" 2>&1
+        PATH="$stub_dir:$BASE_PATH" \
+        GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
+        GIT_STUB_LOG="$log_file" \
+        GIT_STUB_STATE_DIR="$state_dir" \
+        scripts/gh-msync --headless --no-ssh-upgrade "$base_dir" >"$out" 2>&1
     status=$?
     set -e
     assert_status "$status" 0
@@ -289,16 +289,16 @@ EOF_GHSTUB
     pass "no-SSH mode disables HTTPS-to-SSH remote conversion"
 
     out="$TMP_ROOT/stubbed-sync-env-override.txt"
-    : > "$log_file"
+    : >"$log_file"
     rm -f "$state_dir/repo-update-updated"
     set +e
     HOME="$home_dir" \
-    PATH="$stub_dir:$BASE_PATH" \
-    GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
-    GH_MSYNC_NO_SSH_UPGRADE=1 \
-    GIT_STUB_LOG="$log_file" \
-    GIT_STUB_STATE_DIR="$state_dir" \
-    scripts/gh-msync --headless --ssh-upgrade "$base_dir" >"$out" 2>&1
+        PATH="$stub_dir:$BASE_PATH" \
+        GH_MSYNC_DISABLE_INTEGRATIONS_AUTOSETUP=1 \
+        GH_MSYNC_NO_SSH_UPGRADE=1 \
+        GIT_STUB_LOG="$log_file" \
+        GIT_STUB_STATE_DIR="$state_dir" \
+        scripts/gh-msync --headless --ssh-upgrade "$base_dir" >"$out" 2>&1
     status=$?
     set -e
     assert_status "$status" 0
@@ -320,9 +320,9 @@ scenario_missing_repo_clone_url_selection() {
     state_dir="$TMP_ROOT/clone-selection-state"
     log_file="$TMP_ROOT/clone-selection-git.log"
     mkdir -p "$home_dir" "$base_dir/local-existing/.git" "$stub_dir" "$state_dir"
-    : > "$log_file"
+    : >"$log_file"
 
-    cat > "$stub_dir/git" <<'EOF_GITCLONESTUB'
+    cat >"$stub_dir/git" <<'EOF_GITCLONESTUB'
 #!/bin/bash
 set -euo pipefail
 repo="$(basename "$PWD")"
@@ -369,7 +369,7 @@ exit 99
 EOF_GITCLONESTUB
     chmod +x "$stub_dir/git"
 
-    cat > "$stub_dir/gh" <<'EOF_GHCLONESTUB'
+    cat >"$stub_dir/gh" <<'EOF_GHCLONESTUB'
 #!/bin/bash
 set -euo pipefail
 case "${1:-}" in
@@ -402,7 +402,7 @@ EOF_GHCLONESTUB
     assert_file_contains "$log_file" "clone-url:git@github.com:Owner/missing-repo.git"
     pass "missing-repo clone defaults to SSH URL selection"
 
-    : > "$log_file"
+    : >"$log_file"
     out="$TMP_ROOT/clone-selection-https.txt"
     set +e
     run_with_tty_and_input "$out" $'y\n1\n' \

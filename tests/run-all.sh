@@ -40,7 +40,7 @@ export GH_MSYNC_TEST_REQUIRE_SHELLCHECK="$REQUIRE_SHELLCHECK"
 export GH_MSYNC_TEST_PROFILE="$PROFILE"
 
 case "$PROFILE" in
-    full|ci-posix)
+    full | ci-posix)
         TEST_SCRIPTS=(
             "$TESTS_DIR/quality-checks.sh"
             "$TESTS_DIR/smoke-integrations.sh"

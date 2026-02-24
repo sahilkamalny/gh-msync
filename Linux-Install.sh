@@ -3,6 +3,13 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Some Linux file managers launch .sh files without a visible terminal.
 # Spawn a terminal when available so users can follow installation output.
+guake_is_running() {
+    if ! command -v pgrep >/dev/null 2>&1; then
+        return 1
+    fi
+    pgrep -x guake >/dev/null 2>&1
+}
+
 run_with_detected_terminal() {
     local launcher="$1"
     local bash_cmd
@@ -25,21 +32,26 @@ run_with_detected_terminal() {
         kitty bash "$launcher"
     elif command -v wezterm >/dev/null 2>&1; then
         wezterm start -- bash "$launcher"
-    elif command -v footclient >/dev/null 2>&1; then
-        footclient -e bash "$launcher"
     elif command -v foot >/dev/null 2>&1; then
         foot -e bash "$launcher"
-    elif command -v guake >/dev/null 2>&1; then
+    elif command -v footclient >/dev/null 2>&1; then
+        footclient -e bash "$launcher"
+    elif command -v guake >/dev/null 2>&1 && guake_is_running; then
+        guake --show >/dev/null 2>&1 || true
         guake -e "$bash_cmd"
     elif command -v terminator >/dev/null 2>&1; then
         terminator -e "$bash_cmd"
     elif command -v x-terminal-emulator >/dev/null 2>&1; then
-        x-terminal-emulator -e bash "$launcher"
+        x-terminal-emulator -e "$launcher"
     elif command -v xterm >/dev/null 2>&1; then
         xterm -e bash "$launcher"
     else
         return 1
     fi
+
+    # If a terminal launcher was successfully invoked, do not fall back to
+    # direct execution even if the terminal propagates a non-zero child status.
+    return 0
 }
 
 run_in_terminal() {
@@ -57,7 +69,7 @@ run_in_terminal() {
 
     local launcher
     launcher="$(mktemp "${TMPDIR:-/tmp}/gh-msync-install.XXXXXX")"
-    cat > "$launcher" <<EOF
+    cat >"$launcher" <<EOF
 #!/bin/bash
 $script_cmd
 read -r -p 'Press [Enter] to close...'

@@ -13,7 +13,7 @@
 
 **Run modes:** `gh-msync` · `gh msync` (GitHub CLI extension)
 
-**Proof points:** CI on macOS + Windows (Git Bash) + Linux (Ubuntu + pinned distro matrix) · non-destructive test suite · `shellcheck` + `actionlint` + docs/spelling linting · Homebrew + `gh` extension support
+**Proof points:** CI on macOS + Windows (Git Bash) + Linux (Ubuntu + pinned distro matrix) · non-destructive test suite · shell/docs/CI linting (`shellcheck`, `shfmt`, `actionlint`, `markdownlint`, `typos`) · Homebrew + `gh` extension support
 
 **Built with:** Bash · GitHub CLI · AppleScript
 
@@ -35,7 +35,7 @@
 
 ## Engineering highlights
 
-- **Portfolio-grade engineering signals**: repo-local automated tests, shell/CI/docs linting (`shellcheck`, `actionlint`, `markdownlint`, `typos`), and GitHub Actions CI across macOS, Windows (Git Bash), Ubuntu, plus a pinned Linux distro compatibility matrix (Debian/Fedora/Alpine).
+- **Portfolio-grade engineering signals**: repo-local automated tests, shell/CI/docs linting (`shellcheck`, `shfmt`, `actionlint`, `markdownlint`, `typos`), and GitHub Actions CI across macOS, Windows (Git Bash), Ubuntu, plus a pinned Linux distro compatibility matrix (Debian/Fedora/Alpine).
 - **User-facing reliability**: failed pulls trigger `git rebase --abort`, and launcher fallbacks preserve real runtime errors (no masking).
 - **Cross-install-method consistency**: Homebrew, from-source, and `gh` extension mode share the same launcher integration behavior.
 - **Practical CLI UX**: interactive configuration, optional GUI flows, and explicit HTTPS/SSH mode control.
@@ -45,6 +45,8 @@
 ## Overview
 
 GitHub Multi-Sync (`gh-msync`) syncs local Git repositories in parallel across one or more configured root folders. Run `gh-msync` directly or `gh msync` as a GitHub CLI extension. Across install methods, it can create a Spotlight-searchable **GitHub Multi-Sync** app on macOS and a Linux application launcher.
+
+Platform support is tracked with explicit support tiers in [COMPATIBILITY.md](COMPATIBILITY.md).
 
 ---
 
@@ -286,7 +288,7 @@ Coverage includes:
 
 - Shell syntax + `shellcheck` + Homebrew formula Ruby syntax checks
 - GitHub Actions workflow linting (`actionlint`) plus docs/spelling linting (`markdownlint`, `typos`) in CI
-- Shell formatting checks (`shfmt`) in local quality checks and an advisory CI job (staged rollout before repo-wide normalization)
+- Shell formatting checks (`shfmt`) in local quality checks and CI
 - Launcher integration smoke tests
 - Core `gh-msync` behavior tests (flags, config parsing, SSH/HTTPS logic, clone URL selection)
 - Real `git` integration tests using local bare remotes only (no network)
@@ -301,6 +303,7 @@ Optional:
 - Linux distro compatibility subset (used in CI containers): `tests/run-all.sh --profile linux-compat`
 - Optional local tooling lint (if installed): `shfmt`, `markdownlint-cli2`/`markdownlint`, `typos` are auto-detected by `tests/quality-checks.sh`
 - Keep temporary test artifacts for debugging: `GH_MSYNC_TEST_KEEP_TEMP=1 tests/run-all.sh`
+- WSL manual validation checklist (Tier 2 smoke): `docs/WSL-SMOKE-CHECKLIST.md`
 
 ---
 
@@ -369,6 +372,7 @@ The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if i
 | `Linux-Install.sh` | Linux entry point → runs `scripts/install.sh`. |
 | `macOS-Uninstall.command` / `Linux-Uninstall.sh` | Entry points → run `scripts/uninstall.sh`. |
 | `packaging/homebrew/gh-msync.rb` | Homebrew formula (installs the binary + helper scripts, and auto-installs shared launcher integrations). |
+| `COMPATIBILITY.md` | Platform support tiers, CI coverage scope, and compatibility roadmap. |
 | `.markdownlint-cli2.yaml` | Markdown lint configuration (allows inline HTML/long lines used in README presentation). |
 | `.typos.toml` | Spelling lint configuration (project-specific allowed words/exclusions). |
 | `RELEASING.md` | Release checklist for tags/tarballs/Homebrew formula updates and final verification. |
@@ -377,6 +381,7 @@ The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if i
 | `tests/lib/testlib.sh` | Shared test helpers (assertions, temp dirs, PTY input, git fixtures, platform capability checks). |
 | `tests/README.md` | Test suite layout, naming conventions, profiles, and guidance for adding tests. |
 | `assets/` | Demo assets (e.g. `demo.tape`, `demo.gif`). |
+| `docs/WSL-SMOKE-CHECKLIST.md` | Manual WSL validation checklist (Tier 2 support smoke test). |
 
 ---
 
@@ -421,6 +426,6 @@ MIT — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-*© 2026 Sahil Kamal*
+© 2026 Sahil Kamal
 
 </div>

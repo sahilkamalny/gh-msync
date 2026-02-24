@@ -33,7 +33,7 @@ test_platform() {
 
 is_windows_like() {
     case "$(test_platform)" in
-        MINGW*|MSYS*|CYGWIN*)
+        MINGW* | MSYS* | CYGWIN*)
             return 0
             ;;
     esac
@@ -102,7 +102,7 @@ cleanup_temp_root() {
 
 make_osacompile_stub() {
     local dir="$1"
-    cat > "$dir/osacompile" <<'EOS'
+    cat >"$dir/osacompile" <<'EOS'
 #!/bin/bash
 out=""
 while [ $# -gt 0 ]; do
@@ -241,7 +241,7 @@ git_commit_file() {
     local contents="$3"
     local message="$4"
     mkdir -p "$(dirname -- "$repo/$path")"
-    printf '%s\n' "$contents" > "$repo/$path"
+    printf '%s\n' "$contents" >"$repo/$path"
     git -C "$repo" add "$path"
     git -C "$repo" commit -m "$message" >/dev/null
 }
