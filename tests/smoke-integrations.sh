@@ -111,6 +111,12 @@ if [ "$OS" = "Darwin" ]; then
         'tell application \\"Terminal\\" to close (every window whose id is $WIN_ID) saving no'
     assert_contains \
         "$HOME1/Applications/GitHub Multi-Sync.app/Contents/Resources/run.sh" \
+        'nohup osascript'
+    assert_contains \
+        "$HOME1/Applications/GitHub Multi-Sync.app/Contents/Resources/run.sh" \
+        "-e 'delay 0.1'"
+    assert_not_contains \
+        "$HOME1/Applications/GitHub Multi-Sync.app/Contents/Resources/run.sh" \
         'nohup bash -c "sleep 0.1; osascript -e'
     # shellcheck disable=SC2016 # Intentional literal pattern match against generated wrapper content.
     assert_line_order \
