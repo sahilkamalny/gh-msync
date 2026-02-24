@@ -1,6 +1,16 @@
-# Test Suite Layout
+# Test Suite Guide
 
 This repository uses a small, repo-local shell test suite designed for fast local runs and CI visibility.
+
+Related docs: [README.md](../README.md) · [COMPATIBILITY.md](../COMPATIBILITY.md) · [RELEASING.md](../RELEASING.md)
+
+## Quick start
+
+```bash
+tests/run-all.sh --require-shellcheck
+```
+
+Use `--profile ...` to run CI-aligned subsets (see [Profiles](#profiles)).
 
 ## Philosophy
 
@@ -9,7 +19,7 @@ This repository uses a small, repo-local shell test suite designed for fast loca
 - Keep tests executable and runnable directly.
 - Keep a single local entrypoint (`tests/run-all.sh`) for developers and CI.
 
-## File structure
+## Layout
 
 - `tests/run-all.sh`: orchestrates all quality/smoke/integration tests and supports CI profiles.
 - `tests/quality-checks.sh`: syntax, lint, and repo hygiene checks (shellcheck/actionlint, optional shfmt/markdownlint/typos when installed).
@@ -34,7 +44,7 @@ Examples:
 - `tests/run-all.sh --profile linux-compat`
 - `tests/run-all.sh --list-profiles`
 
-## Naming conventions
+## Naming
 
 - Use lowercase, hyphen-separated shell script names (consistent with the rest of the repo).
 - Name tests by scope/intent, not implementation details:
@@ -43,7 +53,7 @@ Examples:
   - behavior/integration scripts for feature-level coverage
 - Keep helper code in `tests/lib/` (not mixed into runnable test scripts).
 
-## Adding new tests
+## Adding tests
 
 - Add a new executable script in `tests/` if it covers a new scope.
 - Source `tests/lib/testlib.sh` for shared assertions/helpers.

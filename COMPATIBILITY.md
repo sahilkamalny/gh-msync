@@ -1,8 +1,10 @@
 # Compatibility & Support Tiers
 
-This document defines **what `gh-msync` actively verifies**, what is **best-effort**, and what is **community-tested only**.
+This document defines what `gh-msync` actively verifies in CI, what is best-effort, and what is community-tested only.
 
-It exists to keep platform claims clear, honest, and easy to review.
+Use it to keep platform claims clear, honest, and easy to review.
+
+Related docs: [README.md](README.md) · [docs/WSL-SMOKE-CHECKLIST.md](docs/WSL-SMOKE-CHECKLIST.md) · [tests/README.md](tests/README.md)
 
 ## Support tiers
 
@@ -28,7 +30,7 @@ These environments are expected to work but are not currently fully CI-enforced 
 - **Additional Linux distros / desktop environments** beyond the current matrix
 - **Linux GUI dialog variants** (`zenity` / `kdialog`) and launcher behavior across different desktop stacks
 
-See `/Users/sahilkamalny/Scripts/gh-msync/docs/WSL-SMOKE-CHECKLIST.md` for a repeatable WSL validation flow.
+See [docs/WSL-SMOKE-CHECKLIST.md](docs/WSL-SMOKE-CHECKLIST.md) for a repeatable WSL validation flow.
 
 ### Tier 3 (community-tested / future expansion)
 
@@ -65,7 +67,7 @@ The project is designed with CLI fallbacks so missing GUI tools should not block
 
 ## Roadmap (practical next steps)
 
-1. Promote all Linux compatibility matrix jobs to required checks after enough stable green runs.
+1. Keep CI job names and required-check branch-protection settings in sync whenever the workflow matrix or job labels change.
 2. Add more high-signal Linux distros (for example openSUSE, Arch, Rocky/Alma) using the `linux-compat` profile.
 3. Add FreeBSD coverage via **Cirrus CI** (or a self-hosted BSD runner) for syntax/lint/core subset tests.
 4. Add optional Linux GUI smoke automation (Xvfb + `zenity`/`kdialog`) if GUI portability becomes a product priority.

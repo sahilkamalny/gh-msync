@@ -2,7 +2,7 @@
 
 # GitHub Multi-Sync
 
-**Parallel GitHub repo sync CLI for multi-folder local workflows, with safe failure handling and SSH/HTTPS control.**
+**Parallel GitHub repo sync CLI for multi-root local workflows, with safe failure handling and explicit SSH/HTTPS control.**
 
 [![CI](https://github.com/sahilkamalny/gh-msync/actions/workflows/ci.yml/badge.svg)](https://github.com/sahilkamalny/gh-msync/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
@@ -13,7 +13,9 @@
 
 **Run modes:** `gh-msync` · `gh msync` (GitHub CLI extension)
 
-**Proof points:** CI on macOS + Windows (Git Bash) + Linux (Ubuntu + pinned distro matrix) · non-destructive test suite · shell/docs/CI linting (`shellcheck`, `shfmt`, `actionlint`, `markdownlint`, `typos`) · Homebrew + `gh` extension support
+**Proof points:** CI on macOS + Windows (Git Bash) + Linux (Ubuntu + pinned distro matrix) · non-destructive repo-local test suite · Homebrew + `gh` extension support
+
+**Quality gates:** `shellcheck` · `shfmt` · `actionlint` · `markdownlint` · `typos`
 
 **Built with:** Bash · GitHub CLI · AppleScript
 
@@ -33,10 +35,18 @@
 
 ---
 
+## Start here
+
+- **Install + configure fast**: jump to [Quick start](#quick-start) (Homebrew, `gh` extension, or from-source installer flows).
+- **Need platform expectations?** See [COMPATIBILITY.md](COMPATIBILITY.md) for CI-enforced support tiers and best-effort environments.
+- **Validating locally before changes?** Run `tests/run-all.sh` (details in [tests/README.md](tests/README.md)).
+
+---
+
 ## Engineering highlights
 
-- **Portfolio-grade engineering signals**: repo-local automated tests, shell/CI/docs linting (`shellcheck`, `shfmt`, `actionlint`, `markdownlint`, `typos`), and GitHub Actions CI across macOS, Windows (Git Bash), Ubuntu, plus a pinned Linux distro compatibility matrix (Debian/Fedora/Alpine).
-- **Branch-protection-ready governance**: CI lanes and check names are standardized for a protected `main` workflow with required PR + lint/test checks.
+- **Engineering quality signals**: repo-local automated tests, shell/CI/docs linting (`shellcheck`, `shfmt`, `actionlint`, `markdownlint`, `typos`), and GitHub Actions CI across macOS, Windows (Git Bash), Ubuntu, plus a pinned Linux distro compatibility matrix (Debian/Fedora/Alpine).
+- **Protected-main governance**: standardized CI lanes/check names support required PR + lint/test checks on `main`, with `CHANGELOG.md` and `RELEASING.md` for repeatable release operations.
 - **User-facing reliability**: failed pulls trigger `git rebase --abort`, and launcher fallbacks preserve real runtime errors (no masking).
 - **Cross-install-method consistency**: Homebrew, from-source, and `gh` extension mode share the same launcher integration behavior.
 - **Practical CLI UX**: interactive configuration, optional GUI flows, and explicit HTTPS/SSH mode control.

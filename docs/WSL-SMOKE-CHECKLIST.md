@@ -4,6 +4,8 @@ Use this checklist to validate `gh-msync` in **Windows Subsystem for Linux (WSL)
 
 This is a **manual smoke checklist** (Tier 2 support), not a replacement for CI.
 
+Related docs: [README.md](../README.md) · [COMPATIBILITY.md](../COMPATIBILITY.md) · [tests/README.md](../tests/README.md)
+
 ## Scope
 
 This checklist validates:
@@ -128,7 +130,7 @@ Expected:
 - missing-repository discovery prompt behavior works in terminal mode
 - no GUI dependency required
 
-## Result template (copy/paste)
+## Result template
 
 ```text
 WSL smoke result: PASS / FAIL

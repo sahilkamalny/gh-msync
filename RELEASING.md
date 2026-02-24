@@ -2,6 +2,8 @@
 
 This checklist is for publishing a new tagged release and keeping the Homebrew formula in sync.
 
+Related docs: `CHANGELOG.md` · `README.md` · `packaging/homebrew/README.md`
+
 ## Pre-release checks
 
 1. Ensure the working tree is clean (`git status`).
@@ -18,6 +20,7 @@ This checklist is for publishing a new tagged release and keeping the Homebrew f
 1. Choose the release version (for example `v1.0.1`).
 2. Confirm the Homebrew formula source URL in `packaging/homebrew/gh-msync.rb` points to the intended tag archive.
 3. Update the formula `url` (tag tarball) if it changed.
+4. Decide whether the tag will point to the same commit as `main`, or whether Homebrew SHA refresh will be a follow-up `main` commit after the tag is pushed.
 
 ## Publish the GitHub release
 
@@ -25,7 +28,7 @@ This checklist is for publishing a new tagged release and keeping the Homebrew f
 2. Create and push the tag:
    - `git tag vX.Y.Z`
    - `git push origin vX.Y.Z`
-3. Create or rewrite the GitHub release notes for that tag using the matching `CHANGELOG.md` entry.
+3. Create or rewrite the GitHub release notes for that tag using the matching `CHANGELOG.md` entry (keep release notes and changelog language aligned).
 
 ## Update Homebrew formula SHA
 

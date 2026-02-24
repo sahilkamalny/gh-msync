@@ -12,16 +12,16 @@ For GitHub CLI extension mode, users install from the main repo:
 gh extension install sahilkamalny/gh-msync
 ```
 
-See the main [README](../../README.md) for installation and usage.
+Related docs: [README.md](../../README.md) · [RELEASING.md](../../RELEASING.md) · [CHANGELOG.md](../../CHANGELOG.md)
 
-## Maintainer note
+## Maintainer notes
 
 Before publishing a new release, update `packaging/homebrew/gh-msync.rb` with:
 
 1. The new tag URL (if version changed).
 2. The exact tarball SHA256 for that tag.
 
-## Release checklist (manual)
+## Release checklist
 
 1. Ensure working tree is clean on `main`.
 2. Create or update the tag (example: `v1.0.0`) and push it.
