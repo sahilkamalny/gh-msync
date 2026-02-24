@@ -47,24 +47,6 @@ assert_file_not_contains() {
     fi
 }
 
-assert_contains() {
-    local haystack="$1"
-    local needle="$2"
-    case "$haystack" in
-        *"$needle"*) ;;
-        *) fail "expected output to contain: $needle" ;;
-    esac
-}
-
-assert_not_contains() {
-    local haystack="$1"
-    local needle="$2"
-    case "$haystack" in
-        *"$needle"*) fail "did not expect output to contain: $needle" ;;
-        *) ;;
-    esac
-}
-
 assert_eq() {
     local actual="$1"
     local expected="$2"
@@ -93,11 +75,6 @@ cleanup_temp_root() {
     /bin/rm -rf "$root"
 }
 
-strip_ansi() {
-    # Use a literal ESC byte in the regex for BSD/GNU sed portability.
-    sed -E $'s/\033\\[[0-9;]*[A-Za-z]//g'
-}
-
 make_osacompile_stub() {
     local dir="$1"
     cat > "$dir/osacompile" <<'EOS'
@@ -116,16 +93,6 @@ mkdir -p "$out/Contents/Resources"
 exit 0
 EOS
     chmod +x "$dir/osacompile"
-}
-
-run_and_capture() {
-    local output_file="$1"
-    shift
-    set +e
-    "$@" >"$output_file" 2>&1
-    local status=$?
-    set -e
-    return "$status"
 }
 
 run_with_tty_and_input() {

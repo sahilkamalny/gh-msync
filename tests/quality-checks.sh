@@ -18,7 +18,7 @@ cd "$REPO_DIR"
 shell_files=()
 while IFS= read -r file; do
     case "$file" in
-        *.sh|*.command|gh-msync)
+        *.sh|*.command|gh-msync|scripts/gh-msync)
             shell_files+=("$file")
             ;;
     esac
@@ -69,7 +69,11 @@ for path in \
     scripts/system-integrations.sh \
     tests/smoke-integrations.sh \
     tests/run-all.sh \
-    tests/quality-checks.sh
+    tests/quality-checks.sh \
+    tests/core-behavior.sh \
+    tests/real-git-sync.sh \
+    tests/configure-install-uninstall.sh \
+    tests/lib/testlib.sh
 do
     [ -x "$path" ] || fail "expected executable bit on $path"
 done
