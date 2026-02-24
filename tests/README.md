@@ -12,7 +12,7 @@ This repository uses a small, repo-local shell test suite designed for fast loca
 ## File structure
 
 - `tests/run-all.sh`: orchestrates all quality/smoke/integration tests and supports CI profiles.
-- `tests/quality-checks.sh`: syntax, lint, and repo hygiene checks.
+- `tests/quality-checks.sh`: syntax, lint, and repo hygiene checks (shellcheck/actionlint, optional shfmt/markdownlint/typos when installed).
 - `tests/smoke-integrations.sh`: fast launcher integration smoke tests.
 - `tests/core-behavior.sh`: core `gh-msync` behavior tests (stubbed and interactive CLI scenarios).
 - `tests/real-git-sync.sh`: real `git` integration tests against local bare remotes.
@@ -24,7 +24,7 @@ This repository uses a small, repo-local shell test suite designed for fast loca
 - `full` (default): runs the complete local suite.
 - `ci-posix`: runs the full suite used by the macOS/Linux CI jobs.
 - `windows-git-bash`: runs a Windows-compatible subset (skips POSIX-only lifecycle tests and PTY-only scenarios).
-- `linux-compat`: runs a distro-portability subset used by Linux compatibility CI containers (Debian/Fedora/Alpine).
+- `linux-compat`: runs a distro-portability subset used by Linux compatibility CI containers (currently `debian-12`, `fedora-41`, `alpine-3.20`).
 
 Examples:
 

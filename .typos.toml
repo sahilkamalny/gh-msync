@@ -1,0 +1,7 @@
+[default.extend-words]
+msync = "msync"
+
+[files]
+extend-exclude = [
+  "assets/demo.gif",
+]

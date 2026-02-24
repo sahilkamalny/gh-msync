@@ -13,7 +13,7 @@
 
 **Run modes:** `gh-msync` · `gh msync` (GitHub CLI extension)
 
-**Proof points:** macOS/Linux CI · non-destructive test suite · `shellcheck` clean · Homebrew + `gh` extension support
+**Proof points:** CI on macOS + Windows (Git Bash) + Linux (Ubuntu + pinned distro matrix) · non-destructive test suite · `shellcheck` + `actionlint` + docs/spelling linting · Homebrew + `gh` extension support
 
 **Built with:** Bash · GitHub CLI · AppleScript
 
@@ -33,37 +33,18 @@
 
 ---
 
-## Table of contents
-
-- [Engineering highlights](#engineering-highlights)
-- [Overview](#overview)
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Quick start](#quick-start)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Testing (repo-local)](#testing-repo-local)
-- [Uninstallation](#uninstallation)
-- [Project structure](#project-structure)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
 ## Engineering highlights
 
-- **Portfolio-grade engineering signals**: repo-local automated test suite, `shellcheck` coverage, and GitHub Actions CI on macOS + Linux.
-- **User-facing reliability**: failed pulls trigger `git rebase --abort` protection and launcher fallbacks preserve real runtime errors.
+- **Portfolio-grade engineering signals**: repo-local automated tests, shell/CI/docs linting (`shellcheck`, `actionlint`, `markdownlint`, `typos`), and GitHub Actions CI across macOS, Windows (Git Bash), Ubuntu, plus a pinned Linux distro compatibility matrix (Debian/Fedora/Alpine).
+- **User-facing reliability**: failed pulls trigger `git rebase --abort`, and launcher fallbacks preserve real runtime errors (no masking).
 - **Cross-install-method consistency**: Homebrew, from-source, and `gh` extension mode share the same launcher integration behavior.
-- **Practical CLI UX**: interactive configuration, optional GUI flows, and HTTPS/SSH mode control for different developer environments.
+- **Practical CLI UX**: interactive configuration, optional GUI flows, and explicit HTTPS/SSH mode control.
 
 ---
 
 ## Overview
 
-GitHub Multi-Sync (`gh-msync`) is a cross-platform utility for syncing local Git repositories in parallel. Run `gh-msync` from any directory to discover and pull repositories under your configured folders. If you install it as a GitHub CLI extension, run `gh msync`. Across install methods, it can create a Spotlight-searchable **GitHub Multi-Sync** app on macOS and a **GitHub Multi-Sync** launcher on Linux.
+GitHub Multi-Sync (`gh-msync`) syncs local Git repositories in parallel across one or more configured root folders. Run `gh-msync` directly or `gh msync` as a GitHub CLI extension. Across install methods, it can create a Spotlight-searchable **GitHub Multi-Sync** app on macOS and a Linux application launcher.
 
 ---
 
@@ -110,7 +91,7 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 2. **Run:** `gh-msync` (or `gh msync` in extension mode).
 3. **Configure paths (optional):** `gh-msync --configure` (or `gh msync --configure`).
 
-Desktop integration (all install methods): the macOS app / Linux launcher is auto-created on first interactive run, or you can create it explicitly with `gh-msync --install-integrations` (or `gh msync --install-integrations`).
+Desktop integrations (all install methods): the macOS app / Linux launcher is auto-created on the first interactive run, or created explicitly with `--install-integrations`.
 
 Command by install method:
 
@@ -120,7 +101,7 @@ Command by install method:
 | From source installer | `gh-msync` | Yes (`~/.local/bin/gh-msync`) |
 | GitHub CLI extension | `gh msync` | No |
 
-For install-method details (PATH behavior, app/launcher behavior, uninstall steps), see [Installation](#installation) and [Uninstallation](#uninstallation).
+For install-method details (PATH, launcher behavior, uninstall), see [Installation](#installation) and [Uninstallation](#uninstallation).
 
 ---
 
@@ -128,7 +109,7 @@ For install-method details (PATH behavior, app/launcher behavior, uninstall step
 
 ### Shared desktop integrations (all install methods)
 
-The macOS app (`~/Applications/GitHub Multi-Sync.app`) and Linux launcher (`~/.local/share/applications/gh-msync.desktop`) are managed the same way across install methods:
+The macOS app (`~/Applications/GitHub Multi-Sync.app`) and Linux launcher (`~/.local/share/applications/gh-msync.desktop`) behave the same across install methods:
 
 - They are auto-created on the first interactive run.
 - You can create/update them manually with `gh-msync --install-integrations` (or `gh msync --install-integrations`).
@@ -136,7 +117,7 @@ The macOS app (`~/Applications/GitHub Multi-Sync.app`) and Linux launcher (`~/.l
 
 ### Option A: Homebrew (macOS & Linux, recommended when available)
 
-Works on **macOS and Linux** (Homebrew supports both). Install with the formula name `gh-msync`, then run the command as `gh-msync`.
+Homebrew works on **macOS and Linux**. Install formula `gh-msync`, then run `gh-msync`.
 
 Install with one command (Homebrew taps the repo automatically):
 
@@ -152,12 +133,12 @@ brew install gh-msync
 
 Notes:
 
-- Installs `gh-msync` into your Homebrew prefix (for example `/opt/homebrew/bin` on Apple Silicon, `/usr/local/bin` on Intel Macs, or your Linux Homebrew prefix).
-- If `gh-msync` is not found immediately after install, initialize your shell with Homebrew's environment (for example `eval "$('/opt/homebrew/bin/brew' shellenv)"` on Apple Silicon, or use the path printed by `brew shellenv`).
+- Installs `gh-msync` into your Homebrew prefix (for example `/opt/homebrew/bin` or `/usr/local/bin`).
+- If `gh-msync` is not found immediately after install, initialize your shell with `brew shellenv`.
 - Creates a default config at `~/.config/gh-msync/config` with `~/GitHub` if it does not exist.
-- Supports the same GUI/CLI path picker as other install methods via `gh-msync --configure` (or `gh-msync --configure --cli`).
-- Auto-installs the same macOS/Linux launcher integrations used by other install methods (and supports `gh-msync --install-integrations` / `gh-msync --uninstall-integrations`).
-- `gh` is optional. Install and log in (`brew install gh && gh auth login`) only if you want missing-repository cloning prompts or extension mode (`gh msync`).
+- Supports the same GUI/CLI path picker as other install methods via `gh-msync --configure`.
+- Auto-installs the same shared macOS/Linux launcher integrations (and supports `--install-integrations` / `--uninstall-integrations`).
+- `gh` is optional; install/login only if you want missing-repository cloning prompts or extension mode (`gh msync`).
 
 ### Option B: From source (all platforms)
 
@@ -167,16 +148,14 @@ Notes:
 | **Linux** | Double-click `Linux-Install.sh` (or run it in a terminal). |
 | **Any**   | From repo root: `./scripts/install.sh` |
 
-The installer will:
+The installer:
 
-1. Create `~/.config/gh-msync` and optionally prompt for repository paths (GUI or CLI).
-2. Make `scripts/gh-msync` executable and symlink it to `~/.local/bin/gh-msync`.
-3. Ensure `~/.local/bin` is on your `PATH` (by appending to your shell rc file if needed).
-4. Install the same shared launcher integrations used by all install methods:
-   - macOS app: `~/Applications/GitHub Multi-Sync.app`
-   - Linux launcher: `~/.local/share/applications/gh-msync.desktop`
+1. Creates `~/.config/gh-msync` and optionally prompts for repository paths (GUI or CLI).
+2. Symlinks `scripts/gh-msync` to `~/.local/bin/gh-msync`.
+3. Ensures `~/.local/bin` is on your `PATH` (appends to a shell rc file if needed).
+4. Installs shared launcher integrations (macOS app / Linux launcher).
 
-After installation, run `gh-msync` from any directory. You can also launch **GitHub Multi-Sync** from Spotlight/Launchpad (macOS) or the application menu (Linux).
+After installation, run `gh-msync` from any directory. On macOS/Linux, you can also launch **GitHub Multi-Sync** from Spotlight/Launchpad or the application menu.
 
 ### Option C: GitHub CLI extension (`gh msync`)
 
@@ -192,58 +171,42 @@ Run it as:
 gh msync
 ```
 
-Extension mode uses the same core script and supports the same flags (for example `gh msync --configure`, `gh msync --cli`, `gh msync --install-integrations`, and `gh msync --uninstall-integrations`). It does **not** install a standalone `gh-msync` binary onto your `PATH`.
+Extension mode uses the same core script and supports the same flags (for example `gh msync --configure`, `gh msync --cli`, `gh msync --install-integrations`, `gh msync --uninstall-integrations`). It does **not** install a standalone `gh-msync` binary on your `PATH`.
 
 ---
 
 ## Configuration
 
-The tool needs to know which **directory (or directories)** hold your Git repos. Those paths are used whenever you run `gh-msync` with no arguments.
+The tool needs one or more repo root directories. These are used when you run `gh-msync` with no path arguments.
 
-**Option 1 — Path picker (recommended):** Run:
+**Option 1 (recommended) — Path picker:** Run:
 
 ```bash
 gh-msync --configure
 ```
 
-This opens the same GUI (macOS/Linux) or a terminal prompt you get with the from-source installer. Use `gh-msync --configure --cli` to force terminal-only prompts. The chosen paths are saved to `~/.config/gh-msync/config`.
+This opens the same GUI (macOS/Linux) or terminal prompt used by the from-source installer. Use `gh-msync --configure --cli` to force terminal-only prompts. Paths are saved to `~/.config/gh-msync/config`.
 
-**Option 2 — Edit the config file:** `~/.config/gh-msync/config` — one path per line (e.g. `~/GitHub` or `~/Projects`). Blank lines and lines starting with `#` are ignored.
+**Option 2 — Edit the config file:** one path per line in `~/.config/gh-msync/config` (blank lines and `#` comments ignored).
 
-**Option 3 — Pass paths each time:** `gh-msync ~/GitHub ~/Projects` (see [Usage](#usage)).
+**Option 3 — Pass paths each run:** `gh-msync ~/GitHub ~/Projects` (see [Usage](#usage)).
 
-**Default:** If no config exists, `~/GitHub` is used.
+**Default:** `~/GitHub` if no config exists.
 
 ---
 
 ## Usage
 
-### Basic
+### Common commands
 
 ```bash
-gh-msync
-```
-
-Uses paths from `~/.config/gh-msync/config` (or `~/GitHub` if unset), pulls all repos in parallel, and optionally prompts to clone missing repositories if `gh` is installed and authenticated.
-
-### Help
-
-```bash
-gh-msync --help
-```
-
-Shows all supported flags and environment toggles.
-
-### Configure paths
-
-```bash
+gh-msync                      # sync using configured roots
+gh-msync --help               # show flags and env toggles
 gh-msync --configure          # GUI or CLI path picker
 gh-msync --configure --cli    # terminal prompts only
 ```
 
-Saves chosen directories to `~/.config/gh-msync/config` so future `gh-msync` runs use them automatically.
-
-Extension equivalent: `gh msync --configure`.
+Paths are saved to `~/.config/gh-msync/config`. Extension equivalent: replace `gh-msync` with `gh msync`.
 
 ### Desktop app / launcher integrations (all install methods)
 
@@ -252,14 +215,9 @@ gh-msync --install-integrations
 gh-msync --uninstall-integrations
 ```
 
-Extension equivalents:
+Extension equivalents: replace `gh-msync` with `gh msync`.
 
-```bash
-gh msync --install-integrations
-gh msync --uninstall-integrations
-```
-
-These create/remove the shared macOS app (`~/Applications/GitHub Multi-Sync.app`) or Linux launcher (`~/.local/share/applications/gh-msync.desktop`) regardless of how you installed the tool.
+Creates/removes the shared macOS app (`~/Applications/GitHub Multi-Sync.app`) or Linux launcher (`~/.local/share/applications/gh-msync.desktop`) regardless of install method.
 
 ### Headless / CLI only
 
@@ -273,7 +231,7 @@ gh-msync --headless
 
 ### SSH / HTTPS behavior (canonical)
 
-By default, GitHub HTTPS remotes are upgraded to SSH **if they are GitHub remotes**. This is a convenience default, not a hard requirement.
+By default, GitHub HTTPS remotes are upgraded to SSH (GitHub remotes only). This is a convenience default, not a requirement.
 
 Use HTTPS mode (no SSH conversion):
 
@@ -327,28 +285,32 @@ tests/run-all.sh
 Coverage includes:
 
 - Shell syntax + `shellcheck` + Homebrew formula Ruby syntax checks
+- GitHub Actions workflow linting (`actionlint`) plus docs/spelling linting (`markdownlint`, `typos`) in CI
+- Shell formatting checks (`shfmt`) in local quality checks and an advisory CI job (staged rollout before repo-wide normalization)
 - Launcher integration smoke tests
 - Core `gh-msync` behavior tests (flags, config parsing, SSH/HTTPS logic, clone URL selection)
 - Real `git` integration tests using local bare remotes only (no network)
 - Configure/install/uninstall lifecycle tests in a temporary `HOME`
+- CI coverage across macOS, Windows (Git Bash), Ubuntu, plus a pinned Linux distro compatibility matrix (`debian-12`, `fedora-41`, `alpine-3.20`)
 
 Optional:
 
-- CI-parity local run that requires `shellcheck`: `tests/run-all.sh --require-shellcheck`
+- CI-parity local run (macOS/Ubuntu jobs): `tests/run-all.sh --profile ci-posix --require-shellcheck`
 - List available test profiles (including the Windows Git Bash subset): `tests/run-all.sh --list-profiles`
-- Run a specific profile: `tests/run-all.sh --profile ci-posix --require-shellcheck`
+- Windows Git Bash compatibility subset: `tests/run-all.sh --profile windows-git-bash`
 - Linux distro compatibility subset (used in CI containers): `tests/run-all.sh --profile linux-compat`
+- Optional local tooling lint (if installed): `shfmt`, `markdownlint-cli2`/`markdownlint`, `typos` are auto-detected by `tests/quality-checks.sh`
 - Keep temporary test artifacts for debugging: `GH_MSYNC_TEST_KEEP_TEMP=1 tests/run-all.sh`
 
 ---
 
 ## Uninstallation
 
-Cleanup depends on install method, but the macOS/Linux launcher cleanup is shared across all of them.
+Cleanup depends on install method, but macOS/Linux launcher cleanup is shared across all of them.
 
 ### Shared launcher cleanup (all install methods)
 
-Before removing the package/extension (while the command still exists), remove the shared launcher integrations if you want a full UI cleanup:
+Before removing the package/extension (while the command still exists), remove shared launcher integrations if you want full UI cleanup:
 
 ```bash
 gh-msync --uninstall-integrations
@@ -356,7 +318,7 @@ gh-msync --uninstall-integrations
 gh msync --uninstall-integrations
 ```
 
-This removes the macOS app (`~/Applications/GitHub Multi-Sync.app`) and/or Linux launcher (`~/.local/share/applications/gh-msync.desktop`) plus related desktop artifacts.
+Removes the macOS app and/or Linux launcher plus related desktop artifacts.
 
 ### Homebrew installs
 
@@ -380,7 +342,7 @@ Remove the extension entrypoint:
 gh extension remove msync
 ```
 
-This removes the GitHub CLI extension. Your config at `~/.config/gh-msync` is typically left in place (remove it manually if you want a full cleanup).
+Removes the GitHub CLI extension. `~/.config/gh-msync` is usually left in place (remove manually for full cleanup).
 
 ### From-source installs (install script / macOS/Linux installers)
 
@@ -390,7 +352,7 @@ Use the platform installer wrappers or the script directly:
 - **Linux:** Double-click `Linux-Uninstall.sh` (or run it in a terminal)
 - **Any:** From repo root: `./scripts/uninstall.sh`
 
-The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if it added one), config, shared launcher integrations, and legacy app artifacts from older installs.
+The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if it added one), config, shared launcher integrations, and legacy app artifacts.
 
 ---
 
@@ -407,15 +369,13 @@ The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if i
 | `Linux-Install.sh` | Linux entry point → runs `scripts/install.sh`. |
 | `macOS-Uninstall.command` / `Linux-Uninstall.sh` | Entry points → run `scripts/uninstall.sh`. |
 | `packaging/homebrew/gh-msync.rb` | Homebrew formula (installs the binary + helper scripts, and auto-installs shared launcher integrations). |
+| `.markdownlint-cli2.yaml` | Markdown lint configuration (allows inline HTML/long lines used in README presentation). |
+| `.typos.toml` | Spelling lint configuration (project-specific allowed words/exclusions). |
 | `RELEASING.md` | Release checklist for tags/tarballs/Homebrew formula updates and final verification. |
-| `tests/run-all.sh` | One-command local test runner (quality checks + all repo-local smoke/integration tests). |
-| `tests/README.md` | Test suite structure, naming conventions, and guidance for adding new tests. |
-| `tests/quality-checks.sh` | Syntax/lint/hygiene checks (`bash -n`, `shellcheck`, Ruby syntax, wrapper/help smoke). |
-| `tests/smoke-integrations.sh` | Non-destructive smoke tests for shared launcher integration creation/removal and launcher fallback behavior. |
-| `tests/core-behavior.sh` | Non-destructive core `gh-msync` behavior tests (flags, sync-flow stubs, interactive clone URL selection). |
-| `tests/real-git-sync.sh` | Real `git` integration tests against local bare remotes (pull/update/skip behavior). |
-| `tests/configure-install-uninstall.sh` | Temp-`HOME` tests for configuration, from-source install/uninstall lifecycle, and Linux wrapper fallback dispatch. |
-| `tests/lib/testlib.sh` | Shared test helpers for assertions, temp dirs, PTY input, and git fixture setup. |
+| `tests/run-all.sh` | One-command local test runner (quality/smoke/integration suites via profiles). |
+| `tests/*.sh` | Repo-local quality, smoke, behavior, real-git, and install/uninstall lifecycle test scripts. |
+| `tests/lib/testlib.sh` | Shared test helpers (assertions, temp dirs, PTY input, git fixtures, platform capability checks). |
+| `tests/README.md` | Test suite layout, naming conventions, profiles, and guidance for adding tests. |
 | `assets/` | Demo assets (e.g. `demo.tape`, `demo.gif`). |
 
 ---
@@ -423,7 +383,7 @@ The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if i
 ## Troubleshooting
 
 - **`gh-msync` not found**  
-  Ensure the directory containing `gh-msync` is on your `PATH`. For from-source installs, that is usually `~/.local/bin`. Restart the terminal or run `source ~/.zshrc` (or your shell rc) after installing.
+  Ensure the directory containing `gh-msync` is on your `PATH` (usually `~/.local/bin` for from-source installs). Restart the terminal or source your shell rc after installing.
 
 - **Repos not found**  
   Check that paths in `~/.config/gh-msync/config` exist and contain directories with a `.git` subdirectory. Or pass paths explicitly: `gh-msync /path/to/parent`.
@@ -432,13 +392,13 @@ The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if i
   Ensure the script is executable: `chmod +x scripts/gh-msync`. The installer does this automatically.
 
 - **Clone step not offered**  
-  Install and log in to the GitHub CLI: `brew install gh && gh auth login`. GitHub Multi-Sync uses it to list and clone missing repos.
+  Install and log in to the GitHub CLI: `brew install gh && gh auth login`. `gh-msync` uses it to list and clone missing repos.
 
 - **macOS app / Linux launcher missing**  
-  Run `gh-msync --install-integrations` (or `gh msync --install-integrations` in extension mode) to create or refresh the shared launcher integrations.
+  Run `gh-msync --install-integrations` (or `gh msync --install-integrations`) to create/refresh shared launcher integrations.
 
 - **SSH errors**  
-  SSH is optional. If you want SSH mode, configure a GitHub SSH key and keep the default behavior. If you do not want SSH, run with `gh-msync --no-ssh-upgrade` (or set `GH_MSYNC_NO_SSH_UPGRADE=1`) to keep HTTPS remotes/clones.
+  SSH is optional. Configure a GitHub SSH key and keep the default behavior, or use `gh-msync --no-ssh-upgrade` (or `GH_MSYNC_NO_SSH_UPGRADE=1`) to keep HTTPS remotes/clones.
 
 - **HTTPS prompts for credentials**  
   This is expected for private repos unless your Git credential helper/PAT is already configured. Use SSH (recommended) or configure Git credentials for HTTPS.
@@ -447,7 +407,7 @@ The from-source uninstaller removes the `gh-msync` symlink, PATH injection (if i
 
 ## Contributing
 
-Pull requests and issues are welcome. For bugs or feature requests, please open an issue.
+Pull requests and issues are welcome.
 
 Before opening a PR, run `tests/run-all.sh` locally. For release steps (tagging, Homebrew formula SHA updates, final verification), see `RELEASING.md`.
 

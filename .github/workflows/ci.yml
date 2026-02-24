@@ -31,6 +31,60 @@ jobs:
       - name: Run actionlint
         run: actionlint
 
+  lint-content:
+    name: Lint (Docs & Spelling)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install markdownlint-cli2 (pinned)
+        run: npm install -g markdownlint-cli2@0.18.1
+
+      - name: Run markdownlint-cli2
+        run: markdownlint-cli2 "**/*.md" "#node_modules"
+
+      - name: Run typos
+        uses: crate-ci/typos@v1
+
+  lint-shell-format:
+    name: Lint (Shell Formatting, shfmt advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shfmt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shfmt
+
+      - name: Check shell formatting (advisory)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t shell_files < <(
+            git ls-files | while IFS= read -r file; do
+              case "$file" in
+                *.sh|*.command|gh-msync|scripts/gh-msync)
+                  printf '%s\n' "$file"
+                  ;;
+              esac
+            done
+          )
+          [ "${#shell_files[@]}" -gt 0 ]
+          shfmt -d -i 4 -ci "${shell_files[@]}"
+
   test:
     name: Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -97,10 +151,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - distro: debian-stable
-            image: debian:stable-slim
-          - distro: fedora-latest
-            image: fedora:latest
+          - distro: debian-12
+            image: debian:12-slim
+          - distro: fedora-41
+            image: fedora:41
           - distro: alpine-3.20
             image: alpine:3.20
     container:
@@ -112,12 +166,12 @@ jobs:
         run: |
           set -eu
           case "${{ matrix.distro }}" in
-            debian-stable)
+            debian-12)
               apt-get update
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 bash ca-certificates coreutils findutils git grep procps python3 sed
               ;;
-            fedora-latest)
+            fedora-41)
               dnf install -y \
                 bash ca-certificates coreutils findutils git grep procps-ng python3 sed
               ;;

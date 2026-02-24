@@ -38,6 +38,13 @@ else
     note "SKIP shellcheck (not installed)"
 fi
 
+if command -v shfmt >/dev/null 2>&1; then
+    shfmt -d -i 4 -ci "${shell_files[@]}" >/dev/null
+    pass "shfmt check passes for tracked shell scripts"
+else
+    note "SKIP shfmt (not installed)"
+fi
+
 if command -v ruby >/dev/null 2>&1; then
     ruby -c packaging/homebrew/gh-msync.rb >/dev/null
     pass "Homebrew formula Ruby syntax is valid"
@@ -72,6 +79,30 @@ if command -v actionlint >/dev/null 2>&1; then
     pass "actionlint passes for GitHub Actions workflows"
 else
     note "SKIP actionlint (not installed)"
+fi
+
+md_files=()
+while IFS= read -r file; do
+    md_files+=("$file")
+done < <(git ls-files '*.md')
+
+if [ "${#md_files[@]}" -gt 0 ]; then
+    if command -v markdownlint-cli2 >/dev/null 2>&1; then
+        markdownlint-cli2 "${md_files[@]}" >/dev/null
+        pass "markdownlint-cli2 passes for tracked Markdown files"
+    elif command -v markdownlint >/dev/null 2>&1; then
+        markdownlint "${md_files[@]}" >/dev/null
+        pass "markdownlint passes for tracked Markdown files"
+    else
+        note "SKIP markdownlint (markdownlint-cli2/markdownlint not installed)"
+    fi
+fi
+
+if command -v typos >/dev/null 2>&1; then
+    typos
+    pass "typos passes for tracked files"
+else
+    note "SKIP typos (not installed)"
 fi
 
 if is_windows_like; then
