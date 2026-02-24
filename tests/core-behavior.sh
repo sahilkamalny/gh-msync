@@ -130,7 +130,7 @@ exit 0
 EOF_CFGSTUB
     chmod +x "$app_dir/scripts/configure-paths.sh"
 
-    # Provide helper so --configure can find it if stdout is a TTY in future changes.
+    # Provide helper so --config can find it if stdout is a TTY in future changes.
     cat >"$app_dir/scripts/system-integrations.sh" <<'EOF_INTSTUB'
 #!/bin/bash
 exit 0
@@ -140,12 +140,12 @@ EOF_INTSTUB
     out="$TMP_ROOT/configure-dispatch.txt"
     mkdir -p "$home_dir"
     set +e
-    HOME="$home_dir" "$app_dir/scripts/gh-msync" --configure --cli >"$out" 2>&1
+    HOME="$home_dir" "$app_dir/scripts/gh-msync" --config --cli >"$out" 2>&1
     status=$?
     set -e
     assert_status "$status" 0
     assert_file_contains "$home_dir/configure-args.log" "--cli"
-    pass "gh-msync --configure dispatches to configure helper and forwards CLI flag"
+    pass "gh-msync --config dispatches to configure helper and forwards CLI flag"
 }
 
 scenario_stubbed_sync_logic() {

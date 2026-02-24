@@ -10,7 +10,7 @@ All notable changes to `gh-msync` will be documented in this file.
 
 ### Initial release
 
-- **Core workflow**: parallel multi-repository sync across one or more repo-root folders with safe failure handling (`git rebase --abort`), interactive configuration, headless/CLI mode, and explicit SSH/HTTPS behavior control (`--no-ssh-upgrade`).
+- **Core workflow**: parallel multi-repository sync across one or more repo-root folders with safe failure handling (`git rebase --abort`), interactive configuration (`--config`), headless/CLI mode, and explicit SSH/HTTPS behavior control (`--no-ssh-upgrade`).
 - **Run modes**: standalone CLI (`gh-msync`) and GitHub CLI extension mode (`gh msync`).
 - **Distribution**: Homebrew formula, from-source installers/uninstallers, and shared desktop integrations across install methods (macOS app + Linux launcher).
 - **Launcher maintenance commands**: canonical `--install-launcher` / `--uninstall-launcher` aliases (long-form `--install-integrations` / `--uninstall-integrations` still supported).

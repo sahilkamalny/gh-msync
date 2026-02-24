@@ -165,7 +165,7 @@ Usage: gh-msync [options] [repo-root ...]
 (GitHub Multi-Sync) Sync local Git repositories in parallel.
 
 Options:
-  --configure, --config     Launch path configuration UI/CLI and exit
+  --config, --configure     Launch path configuration UI/CLI and exit
   --cli, --headless         Force terminal-only prompts (no GUI dialogs)
   --no-ssh-upgrade          Keep GitHub remotes/clones on HTTPS (no SSH conversion)
   --ssh-upgrade             Explicitly enable GitHub HTTPS -> SSH conversion

@@ -1,5 +1,5 @@
 #!/bin/bash
-# GitHub Multi-Sync — path configuration only. Used by gh-msync --configure and by the installer.
+# GitHub Multi-Sync — path configuration only. Used by gh-msync --config (and legacy --configure) and by the installer.
 
 CONFIG_DIR="${HOME}/.config/gh-msync"
 CONFIG_FILE="${CONFIG_DIR}/config"
@@ -318,8 +318,11 @@ if [ "$QUIET" -eq 0 ]; then
         echo -e "    \033[1;34m∘\033[0m $HOME/GitHub (default)"
     fi
     echo ""
-    print_box "✓  Installation Complete!" "\033[1;34m" "\033[1;32m"
+    print_box "✓  Configuration Saved!" "\033[1;34m" "\033[1;32m"
     echo ""
     echo -e "    Run \033[1;36mgh-msync\033[0m to sync repositories in the target paths."
+    echo ""
+    echo ""
+    echo -e "    ©  2026 Sahil Kamal"
     echo ""
 fi

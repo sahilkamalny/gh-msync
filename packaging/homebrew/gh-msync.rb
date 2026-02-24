@@ -38,8 +38,8 @@ class GhMsync < Formula
       gh-msync
 
     Configure which directories to sync (GUI or CLI):
-      gh-msync --configure
-      gh-msync --configure --cli   # terminal prompts only
+      gh-msync --config
+      gh-msync --config --cli      # terminal prompts only
 
     Optional: install GitHub CLI for missing-repo cloning and extension mode:
       brew install gh

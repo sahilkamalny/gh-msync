@@ -67,7 +67,7 @@ print_box() {
 print_box "➢  GitHub Multi-Sync (Installer)" "\033[1;34m" "\033[1;36m"
 echo ""
 
-# Run path configuration (same as gh-msync --configure)
+# Run path configuration (same as gh-msync --config)
 CONFIGURE_SCRIPT="$REPO_DIR/scripts/configure-paths.sh"
 if [ ! -x "$CONFIGURE_SCRIPT" ]; then
     echo "Installer error: configure-paths.sh not found." >&2
@@ -90,7 +90,9 @@ if [ -f "$CONFIG_FILE" ]; then
     USER_PATHS=$(paste -sd ',' "$CONFIG_FILE" 2>/dev/null || echo "")
 fi
 
+INSTALLING_UPDATE=0
 if [ -f "$HOME/.local/bin/gh-msync" ]; then
+    INSTALLING_UPDATE=1
     echo -e "    Configuration saved. Updating \033[1;36mGitHub Multi-Sync\033[0m..."
 else
     echo -e "    Configuration saved. Installing \033[1;36mGitHub Multi-Sync\033[0m..."
@@ -172,7 +174,11 @@ else
     echo ""
 fi
 
-print_box "✓  Installation Complete!" "\033[1;34m" "\033[1;32m"
+if [ "$INSTALLING_UPDATE" -eq 1 ]; then
+    print_box "✓  Installation Updated!" "\033[1;34m" "\033[1;32m"
+else
+    print_box "✓  Installation Complete!" "\033[1;34m" "\033[1;32m"
+fi
 echo ""
 echo -e "    You can now run \033[1;36mgh-msync\033[0m in your terminal,"
 if [[ "$OS" == "Darwin" ]]; then

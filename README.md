@@ -102,8 +102,8 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
    - **GitHub CLI extension:** `gh extension install sahilkamalny/gh-msync`
    - **From source:** Clone this repo and run `./scripts/install.sh` (or double-click `macOS-Install.command` / `Linux-Install.sh` on supported platforms).
 2. **Configure repository root folders (recommended before first sync):**
-   - **Homebrew / GitHub CLI extension:** run `gh-msync --configure` (or `gh msync --configure`) to set the folder(s) that contain your repos.
-   - **From source:** `./scripts/install.sh`, `macOS-Install.command`, and `Linux-Install.sh` include this configuration step for you (or you can run `gh-msync --configure` later).
+   - **Homebrew / GitHub CLI extension:** run `gh-msync --config` (or `gh msync --config`) to set the folder(s) that contain your repos.
+   - **From source:** `./scripts/install.sh`, `macOS-Install.command`, and `Linux-Install.sh` include this configuration step for you (or you can run `gh-msync --config` later).
 3. **Run sync:** `gh-msync` (or `gh msync` in extension mode).
 
 Desktop integrations (optional app/launcher only, all install methods): the macOS app / Linux launcher is auto-created on the first interactive run, or managed explicitly with `--install-launcher` / `--uninstall-launcher` (long forms: `--install-integrations` / `--uninstall-integrations`).
@@ -152,7 +152,7 @@ Notes:
 - Installs `gh-msync` into your Homebrew prefix (for example `/opt/homebrew/bin` or `/usr/local/bin`).
 - If `gh-msync` is not found immediately after install, initialize your shell with `brew shellenv`.
 - Creates a default config at `~/.config/gh-msync/config` with `~/GitHub` if it does not exist.
-- Before your first sync, run `gh-msync --configure` to set the folder(s) that contain your repos (unless `~/GitHub` is already the correct default).
+- Before your first sync, run `gh-msync --config` to set the folder(s) that contain your repos (unless `~/GitHub` is already the correct default).
 - Auto-installs the same shared macOS/Linux launcher integrations (and supports `--install-launcher` / `--uninstall-launcher`, plus long forms `--install-integrations` / `--uninstall-integrations`).
 - `gh` is optional; install/login only if you want missing-repository cloning prompts or extension mode (`gh msync`).
 
@@ -187,9 +187,9 @@ Run it as:
 gh msync
 ```
 
-Extension mode uses the same core script and supports the same flags (for example `gh msync --configure`, `gh msync --cli`, `gh msync --install-launcher`, `gh msync --uninstall-launcher`; long forms also work). It does **not** install a standalone `gh-msync` binary on your `PATH`.
+Extension mode uses the same core script and supports the same flags (for example `gh msync --config`, `gh msync --cli`, `gh msync --install-launcher`, `gh msync --uninstall-launcher`; long forms also work). It does **not** install a standalone `gh-msync` binary on your `PATH`.
 
-After installing the extension, run `gh msync --configure` before your first sync to set the folder(s) that contain your repos (unless `~/GitHub` is already correct).
+After installing the extension, run `gh msync --config` before your first sync to set the folder(s) that contain your repos (unless `~/GitHub` is already correct).
 
 ---
 
@@ -200,10 +200,10 @@ The tool needs one or more repo root directories. These are used when you run `g
 **Option 1 (recommended) — Path picker:** Run:
 
 ```bash
-gh-msync --configure
+gh-msync --config
 ```
 
-This opens the same GUI (macOS/Linux) or terminal prompt used by the from-source installer. Use `gh-msync --configure --cli` to force terminal-only prompts. Paths are saved to `~/.config/gh-msync/config`.
+This opens the same GUI (macOS/Linux) or terminal prompt used by the from-source installer. Use `gh-msync --config --cli` to force terminal-only prompts. Paths are saved to `~/.config/gh-msync/config`.
 
 **Option 2 — Edit the config file:** one path per line in `~/.config/gh-msync/config` (blank lines and `#` comments ignored).
 
@@ -220,8 +220,8 @@ This opens the same GUI (macOS/Linux) or terminal prompt used by the from-source
 ```bash
 gh-msync                      # sync using configured roots
 gh-msync --help               # show flags and env toggles
-gh-msync --configure          # GUI or CLI path picker
-gh-msync --configure --cli    # terminal prompts only
+gh-msync --config             # GUI or CLI path picker
+gh-msync --config --cli       # terminal prompts only
 ```
 
 Paths are saved to `~/.config/gh-msync/config`. Extension equivalent: replace `gh-msync` with `gh msync`.

@@ -58,7 +58,7 @@ gh msync --help
 ## 2. Configuration CLI smoke (no GUI)
 
 ```bash
-gh-msync --configure --cli
+gh-msync --config --cli
 ```
 
 Use one or more test directories when prompted.
